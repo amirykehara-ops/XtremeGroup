@@ -1,0 +1,326 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useUser } from '../contexts/UserContext';
+import { useCart } from '../contexts/CartContext';
+import { Package, Truck, CheckCircle, Clock, ChevronDown, ChevronUp, ShoppingBag, Gift, Link, Star, FileDown } from 'lucide-react';
+import Button from '../components/ui/Button';
+import { Product } from '../types'; // Asegúrate de importar tu tipo Product
+import jsPDF from 'jspdf'; // <--- Añade esta
+import autoTable from 'jspdf-autotable';
+
+// Tipo de Order (alineado con tu web)
+interface OrderItem {
+  id: string;
+  title: string;
+  price: number;
+  quantity: number;
+  img: string;
+  points: number;
+}
+
+interface Order {
+  id: string;
+  date: string;
+  total: number;
+  status: 'pending' | 'shipped' | 'delivered';
+  items: OrderItem[];
+  pointsEarned: number;
+  isExchange?: boolean; // ← Nuevo: Para detectar canjes
+  pointsUsed?: number;
+
+}
+
+const OrderHistory: React.FC = () => {
+  const { user } = useUser();
+  const { addToCart } = useCart();
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'pending' | 'shipped' | 'delivered'>('all');
+  const [orders, setOrders] = useState<Order[]>([]);
+
+useEffect(() => {
+  if (user) {
+    // Leemos de la "bolsa global"
+    const savedAllOrders = localStorage.getItem('all_orders');
+    if (savedAllOrders) {
+      const allOrders: Order[] = JSON.parse(savedAllOrders);
+
+      // Filtramos solo los pedidos que pertenecen a este usuario
+      const myOrders = allOrders.filter((o: any) => 
+        o.customerEmail === user.email || o.userEmail === user.email
+      );
+
+      setOrders(myOrders);
+    }
+  }
+}, [user]);
+
+  if (!user) {
+    return (
+      <div className="pt-28 pb-20 px-6 text-center">
+        <p className="text-2xl text-muted">Inicia sesión para ver tu historial de pedidos</p>
+      </div>
+    );
+  }
+
+  const filteredOrders = orders.filter(order => 
+    filter === 'all' || order.status === filter
+  );
+
+const getStatusIcon = (order: Order) => {
+  if (order.isExchange) return <Gift className="text-purple-500" size={24} />;
+  switch (order.status) {
+    case 'pending': return <Clock className="text-orange-500" size={24} />;
+    case 'shipped': return <Truck className="text-blue-500" size={24} />;
+    case 'delivered': return <CheckCircle className="text-green-500" size={24} />;
+  }
+};
+
+  const getStatusText = (status: Order['status']) => {
+    switch (status) {
+      case 'pending': return 'Pendiente';
+      case 'shipped': return 'Enviado';
+      case 'delivered': return 'Entregado';
+    }
+  };
+
+  const handleBuyAgain = (item: OrderItem) => {
+    // Crea un Product a partir del item (id, title, price, img – sin quantity)
+    const product: Product = {  
+      id: Number(item.id),
+      title: item.title,
+      price: item.price,
+      img: item.img,
+      // Añade otros campos de Product si son requeridos (ej: category: '', desc: '', etc.)
+      category: 'Equipamiento', // Si es requerido, pon un default
+      desc: '',
+      specs: [],
+      points: item.points || Math.floor(item.price / 10),
+      ben:'',
+      ind: '',
+      stock: true // O lo que uses para points
+    };
+
+    // Añade al carrito el product con la quantity del item
+    addToCart(product, item.quantity);
+    alert(`${item.title} agregado al carrito nuevamente`);
+  };
+
+  const downloadOrderPDF = (order: Order) => {
+  const doc = new jsPDF();
+  
+  // Estilo de encabezado
+  doc.setFontSize(20);
+  doc.setTextColor(20, 184, 166); // Tu color accent (teal)
+  doc.text('XTREME GROUP - COMPROBANTE', 14, 20);
+  
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+  doc.text(`Orden ID: #${order.id}`, 14, 28);
+  doc.text(`Fecha: ${order.date}`, 14, 34);
+  doc.text(`Cliente: ${user?.name || user?.email}`, 14, 40);
+  doc.text(`Estado: ${order.status.toUpperCase()}`, 14, 46);
+
+  // Tabla de productos
+  const tableData = order.items.map(item => [
+    item.title,
+    item.quantity,
+    order.isExchange ? 'CANJE' : `S/. ${item.price.toLocaleString('es-PE')}`,
+    order.isExchange ? '-' : `S/. ${(item.price * item.quantity).toLocaleString('es-PE')}`
+  ]);
+
+  autoTable(doc, {
+    startY: 55,
+    head: [['Producto', 'Cant.', 'Precio Unit.', 'Subtotal']],
+    body: tableData,
+    headStyles: { fillColor: order.isExchange ? [147, 51, 234] : [20, 184, 166] }, // Púrpura si es canje
+  });
+
+  // Totales
+  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+  if (order.isExchange) {
+    doc.text(`PUNTOS UTILIZADOS: ${order.pointsUsed} pts`, 14, finalY);
+  } else {
+    doc.text(`TOTAL PAGADO: S/. ${order.total.toLocaleString('es-PE')}`, 14, finalY);
+    doc.text(`PUNTOS GANADOS: ${order.pointsEarned} pts`, 14, finalY + 7);
+  }
+
+  doc.save(`Pedido-Xtreme-${order.id}.pdf`);
+};
+
+  return (
+    <div className="pt-28 pb-20 px-6 max-w-7xl mx-auto min-h-screen">
+      <motion.div 
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-16"
+      >
+        <h1 className="text-5xl md:text-6xl font-black text-dark mb-4">
+          Historial de Pedidos
+        </h1>
+        <p className="text-xl text-muted max-w-xl mx-auto">Revisa tus compras, puntos ganados y vuelve a comprar fácilmente</p>
+      </motion.div>
+
+      {/* Filtros */}
+      <div className="flex flex-wrap justify-center gap-4 mb-12">
+        {(['all', 'pending', 'shipped', 'delivered'] as const).map((f) => (
+          <Button
+            key={f}
+            variant={filter === f ? 'primary' : 'ghost'}
+            onClick={() => setFilter(f)}
+            className="px-6 py-3 rounded-full"
+          >
+            {f === 'all' ? 'Todos' : getStatusText(f)}
+          </Button>
+        ))}
+      </div>
+
+      {/* Lista de pedidos */}
+      <div className="space-y-8">
+        <AnimatePresence>
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order, index) => (
+              <motion.div
+                key={order.id}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`rounded-3xl shadow-2xl border overflow-hidden transition-all ${
+                order.isExchange 
+                  ? 'border-purple-200 bg-gradient-to-r from-white to-purple-50/30' 
+                  : 'bg-white border-slate-100'
+              }`}
+              >
+                {/* Header del pedido */}
+                <div 
+                  className="p-8 cursor-pointer hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-6"
+                  onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                >
+                  <div className="flex items-center gap-6">
+                    <div className={`p-4 rounded-2xl shadow-inner ${order.isExchange ? 'bg-purple-100' : 'bg-slate-50'}`}>
+                      {getStatusIcon(order)} {/* ← Antes decía order.status, ahora solo order */}
+                    </div>
+                  <div>
+                    <p className="text-xl font-bold text-dark">
+                      {order.isExchange ? 'Canje de Premio' : `Orden #${order.id}`}
+                    </p>
+                    <p className="text-muted">{order.date}</p>
+                  </div>
+                  </div>
+
+<div className="text-right">
+  {order.isExchange ? (
+    <p className="text-2xl font-black text-purple-600">-{order.pointsUsed} pts</p>
+  ) : (
+    <p className="text-2xl font-black text-accent">S/. {order.total.toLocaleString('es-PE')}</p>
+  )}
+  <p className="text-sm text-muted mt-2 flex items-center gap-2 justify-end">
+    {order.isExchange ? (
+      <><Star size={16} className="text-purple-500" /> Premio Canjeado</>
+    ) : (
+      <><Gift size={16} className="text-accent" /> +{order.pointsEarned} puntos</>
+    )}
+  </p>
+</div>
+
+                  <motion.div 
+                    animate={{ rotate: expandedOrder === order.id ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ChevronDown size={24} className="text-muted" />
+                  </motion.div>
+                </div>
+
+                {/* Detalle expandible */}
+                <AnimatePresence>
+                  {expandedOrder === order.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, type: "spring" }}
+                      className="border-t border-slate-100 bg-slate-50/50 p-8 space-y-6"
+                    >
+                      <h3 className="text-xl font-bold text-dark mb-4">Productos en este pedido</h3>
+                      <div className="space-y-4">
+                        {order.items.map((item) => (
+                          <div key={item.id} className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-md border border-slate-100">
+                            <img 
+                              src={item.img} 
+                              alt={item.title}
+                              className="w-20 h-20 object-contain rounded-xl"
+                            />
+                            <div className="flex-1">
+                              <p className="font-bold text-dark">{item.title}</p>
+                              <p className="text-muted text-sm">Cantidad: {item.quantity}</p>
+                              <p className="text-accent font-bold mt-1">
+                                S/. {(item.price * item.quantity).toLocaleString('es-PE')}
+                              </p>
+                            </div>
+                          {!order.isExchange && (
+                            <Button 
+                              variant="ghost"
+                              onClick={() => handleBuyAgain(item)}
+                              className="px-4 py-2 text-sm"
+                            >
+                              Comprar de nuevo
+                            </Button>
+                          )}
+                          </div>
+                        ))}
+                      </div>
+                    {/* BUSCA: <div className="pt-6 border-t ..."> */}
+                                      {/* REEMPLAZA EL BLOQUE DEL TOTAL FINAL POR ESTE: */}
+                    <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+                      <div className="flex flex-col items-center sm:items-start">
+                        <span className="text-sm text-muted font-bold uppercase">{order.isExchange ? 'Puntos Canjeados' : 'Inversión Total'}</span>
+                        <span className={`text-2xl font-black ${order.isExchange ? 'text-purple-600' : 'text-accent'}`}>
+                          {order.isExchange 
+                            ? `${order.pointsUsed} pts` 
+                            : `S/. ${order.total.toLocaleString('es-PE')}`
+                          }
+                        </span>
+                      </div>
+
+                      {/* BOTÓN DE DESCARGA PDF */}
+                      <Button 
+                        variant="ghost" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadOrderPDF(order);
+                        }}
+                        className="flex items-center gap-2 border-2 border-slate-100 hover:border-accent hover:text-accent rounded-2xl px-6 py-3 transition-all font-bold"
+                      >
+                        <FileDown size={20} />
+                        Descargar Comprobante PDF
+                      </Button>
+                    </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20"
+            >
+              <Package size={80} className="text-muted mx-auto mb-6" />
+              <p className="text-2xl text-muted">No tienes pedidos aún</p>
+              <p className="text-muted mt-4">Explora nuestro catálogo y realiza tu primera compra</p>
+              <Link to="/equipamiento">
+                <Button variant="primary" className="mt-8 px-8 py-4 text-lg">
+                  Ir al Catálogo
+                </Button>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default OrderHistory;
