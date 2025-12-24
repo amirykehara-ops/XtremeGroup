@@ -45,11 +45,14 @@ useEffect(() => {
       const allOrders: Order[] = JSON.parse(savedAllOrders);
 
       // Filtramos solo los pedidos que pertenecen a este usuario
-      const myOrders = allOrders.filter((o: any) => 
-        o.customerEmail === user.email || o.userEmail === user.email
-      );
+const myAllOrders = allOrders.filter((o: any) => 
+  o.customerEmail === user.email || o.userEmail === user.email
+);
 
-      setOrders(myOrders);
+// ← AQUÍ FILTRAMOS: solo los que NO son canjes
+const myPurchases = myAllOrders.filter((o: Order) => !o.isExchange);
+
+setOrders(myPurchases);
     }
   }
 }, [user]);
@@ -66,15 +69,14 @@ useEffect(() => {
     filter === 'all' || order.status === filter
   );
 
-const getStatusIcon = (order: Order) => {
-  if (order.isExchange) return <Gift className="text-purple-500" size={24} />;
-  switch (order.status) {
+const getStatusIcon = (status: Order['status']) => {
+  switch (status) {
     case 'pending': return <Clock className="text-orange-500" size={24} />;
     case 'shipped': return <Truck className="text-blue-500" size={24} />;
     case 'delivered': return <CheckCircle className="text-green-500" size={24} />;
+    default: return <Package className="text-muted" size={24} />;
   }
 };
-
   const getStatusText = (status: Order['status']) => {
     switch (status) {
       case 'pending': return 'Pendiente';
@@ -105,48 +107,47 @@ const getStatusIcon = (order: Order) => {
     alert(`${item.title} agregado al carrito nuevamente`);
   };
 
-  const downloadOrderPDF = (order: Order) => {
+const downloadOrderPDF = (order: Order) => {
   const doc = new jsPDF();
-  
-  // Estilo de encabezado
-  doc.setFontSize(20);
-  doc.setTextColor(20, 184, 166); // Tu color accent (teal)
-  doc.text('XTREME GROUP - COMPROBANTE', 14, 20);
-  
-  doc.setFontSize(10);
-  doc.setTextColor(100);
-  doc.text(`Orden ID: #${order.id}`, 14, 28);
-  doc.text(`Fecha: ${order.date}`, 14, 34);
-  doc.text(`Cliente: ${user?.name || user?.email}`, 14, 40);
-  doc.text(`Estado: ${order.status.toUpperCase()}`, 14, 46);
+
+  // Título grande en color accent
+  doc.setFontSize(22);
+  doc.setTextColor(20, 184, 166); // Tu color XTREME teal
+  doc.text('XTREME GROUP - COMPROBANTE DE COMPRA', 14, 25);
+
+  // Información básica
+  doc.setFontSize(11);
+  doc.setTextColor(80);
+  doc.text(`Orden ID: #${order.id}`, 14, 35);
+  doc.text(`Fecha: ${order.date}`, 14, 42);
+  doc.text(`Cliente: ${user?.name || user?.email}`, 14, 49);
+  doc.text(`Estado: ${getStatusText(order.status)}`, 14, 56);
 
   // Tabla de productos
   const tableData = order.items.map(item => [
     item.title,
     item.quantity,
-    order.isExchange ? 'CANJE' : `S/. ${item.price.toLocaleString('es-PE')}`,
-    order.isExchange ? '-' : `S/. ${(item.price * item.quantity).toLocaleString('es-PE')}`
+    `S/. ${item.price.toLocaleString('es-PE')}`,
+    `S/. ${(item.price * item.quantity).toLocaleString('es-PE')}`
   ]);
 
   autoTable(doc, {
-    startY: 55,
-    head: [['Producto', 'Cant.', 'Precio Unit.', 'Subtotal']],
+    startY: 70,
+    head: [['Producto', 'Cantidad', 'Precio Unit.', 'Subtotal']],
     body: tableData,
-    headStyles: { fillColor: order.isExchange ? [147, 51, 234] : [20, 184, 166] }, // Púrpura si es canje
+    headStyles: { fillColor: [20, 184, 166] }, // Siempre color XTREME
+    styles: { fontSize: 10 },
   });
 
-  // Totales
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  doc.setFontSize(12);
+  // Total final
+  const finalY = (doc as any).lastAutoTable.finalY + 15;
+  doc.setFontSize(14);
   doc.setTextColor(0);
-  if (order.isExchange) {
-    doc.text(`PUNTOS UTILIZADOS: ${order.pointsUsed} pts`, 14, finalY);
-  } else {
-    doc.text(`TOTAL PAGADO: S/. ${order.total.toLocaleString('es-PE')}`, 14, finalY);
-    doc.text(`PUNTOS GANADOS: ${order.pointsEarned} pts`, 14, finalY + 7);
-  }
+  doc.text(`TOTAL PAGADO: S/. ${order.total.toLocaleString('es-PE')}`, 14, finalY);
+  doc.text(`PUNTOS GANADOS: +${order.pointsEarned} pts`, 14, finalY + 10);
 
-  doc.save(`Pedido-Xtreme-${order.id}.pdf`);
+  // Guardar
+  doc.save(`Compra-Xtreme-${order.id}.pdf`);
 };
 
   return (
@@ -157,7 +158,7 @@ const getStatusIcon = (order: Order) => {
         className="text-center mb-16"
       >
         <h1 className="text-5xl md:text-6xl font-black text-dark mb-4">
-          Historial de Pedidos
+          Historial de Compras
         </h1>
         <p className="text-xl text-muted max-w-xl mx-auto">Revisa tus compras, puntos ganados y vuelve a comprar fácilmente</p>
       </motion.div>
@@ -186,11 +187,7 @@ const getStatusIcon = (order: Order) => {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                className={`rounded-3xl shadow-2xl border overflow-hidden transition-all ${
-                order.isExchange 
-                  ? 'border-purple-200 bg-gradient-to-r from-white to-purple-50/30' 
-                  : 'bg-white border-slate-100'
-              }`}
+                className="rounded-3xl shadow-2xl border border-slate-100 bg-white overflow-hidden transition-all"
               >
                 {/* Header del pedido */}
                 <div 
@@ -199,28 +196,23 @@ const getStatusIcon = (order: Order) => {
                 >
                   <div className="flex items-center gap-6">
                     <div className={`p-4 rounded-2xl shadow-inner ${order.isExchange ? 'bg-purple-100' : 'bg-slate-50'}`}>
-                      {getStatusIcon(order)} {/* ← Antes decía order.status, ahora solo order */}
+                      {getStatusIcon(order.status)} {/* ← Antes decía order.status, ahora solo order */}
                     </div>
                   <div>
-                    <p className="text-xl font-bold text-dark">
-                      {order.isExchange ? 'Canje de Premio' : `Orden #${order.id}`}
-                    </p>
+                  <p className="text-xl font-bold text-dark">
+                    Orden #{order.id}
+                  </p>
                     <p className="text-muted">{order.date}</p>
                   </div>
                   </div>
 
 <div className="text-right">
-  {order.isExchange ? (
-    <p className="text-2xl font-black text-purple-600">-{order.pointsUsed} pts</p>
-  ) : (
-    <p className="text-2xl font-black text-accent">S/. {order.total.toLocaleString('es-PE')}</p>
-  )}
+  <p className="text-2xl font-black text-accent">
+    S/. {order.total.toLocaleString('es-PE')}
+  </p>
   <p className="text-sm text-muted mt-2 flex items-center gap-2 justify-end">
-    {order.isExchange ? (
-      <><Star size={16} className="text-purple-500" /> Premio Canjeado</>
-    ) : (
-      <><Gift size={16} className="text-accent" /> +{order.pointsEarned} puntos</>
-    )}
+    <Gift size={16} className="text-accent" />
+    +{order.pointsEarned} puntos ganados
   </p>
 </div>
 
