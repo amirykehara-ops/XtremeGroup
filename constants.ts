@@ -22,8 +22,11 @@ export const NAV_LINKS = [
   { label: 'Clínica', path: '/clinica' },
   { label: 'Laboratorio', path: '/laboratorio' },
   { label: 'Nosotros', path: '/nosotros' },
-  { label: 'Catálogo', path: '/catalog' }
+  { label: 'Catálogo', path: '/catalog' },
+  {label: 'Suscripciones', path: '/suscripciones'}
 ];
+
+
 
 // Sistema de niveles y descuentos
 export const getUserLevel = (points: number = 0) => {

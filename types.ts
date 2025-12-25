@@ -11,6 +11,8 @@ export const AVAILABLE_COLORS = [
   'Dorado Luxe'
 ] as const;
 
+
+
 export type ProductColor = typeof AVAILABLE_COLORS[number];
 
 export interface Product {

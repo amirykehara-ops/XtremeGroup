@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink as Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LogOut, LayoutDashboard, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../contexts/UserContext';
 import { useCart } from '../../contexts/CartContext';
@@ -188,21 +188,30 @@ useEffect(() => {
       </Link>
     </motion.div>
   )}
-              {NAV_LINKS.map((link, i) => (
-                <motion.div
-                  key={link.path}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                >
-                  <Link 
-                    to={link.path} 
-                    className={`text-3xl font-bold ${location.pathname === link.path ? 'text-accent' : 'text-dark'}`}
-                  >
-                    {link.label}
-                  </Link>
-                </motion.div>
-              ))}
+{NAV_LINKS.map((link, i) => (
+  <motion.div
+    key={link.path}
+    initial={{ x: -20, opacity: 0 }}
+    animate={{ x: 0, opacity: 1 }}
+    transition={{ delay: i * 0.1 }}
+  >
+    <Link 
+      to={link.path} 
+      className={`text-3xl font-bold flex items-center gap-3 ${location.pathname === link.path ? 'text-accent' : 'text-dark'}`}
+      onClick={() => setMobileOpen(false)}
+    >
+      {link.label}
+      {link.label === 'Suscripciones' && (
+        <motion.span
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <Star size={32} className="text-yellow-500" fill="currentColor" />
+        </motion.span>
+      )}
+    </Link>
+  </motion.div>
+))}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

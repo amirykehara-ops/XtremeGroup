@@ -17,6 +17,7 @@
     "mercadopago": "^2.11.0",
     "prop-types": "^15.8.1",
     "react": "^19.2.1",
+    "react-confetti-explosion": "^3.0.3",
     "react-csv": "^2.2.2",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.68.0",
