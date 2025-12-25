@@ -6,7 +6,7 @@ import Button from '../components/ui/Button';
 import { 
   BarChart3, Users, User, Package, Truck, FileText, Settings, 
   LogOut, Plus, Edit2, Trash2, ChevronDown, ChevronUp,
-  Download, Search, CheckCircle2, Clock, PackageCheck, Trophy, Lock, Phone, Shield, MapPin
+  Download, Search, CheckCircle2, Clock, PackageCheck, Trophy, Lock, Phone, Shield, MapPin, Zap, AlertCircle, CheckCircle
 } from 'lucide-react';
 import { PRODUCTS } from '../constants';
 import { Product } from '../types';
@@ -24,6 +24,7 @@ interface AdminUser {
   referralCode: string;
   phone: string;
   address: string;
+  pointsHistory: { date: string; pointsChange: number; reason: string }[];
 }
 
 interface AdminOrder {
@@ -64,31 +65,49 @@ const DashboardAdmin: React.FC = () => {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isAddingProduct, setIsAddingProduct] = useState(false);
+  {/* ESTADOS PARA MODALES */}
+const [showConfirmModal, setShowConfirmModal] = useState(false);
+const [showSuccessModal, setShowSuccessModal] = useState(false);
+const [showErrorModal, setShowErrorModal] = useState(false);
+const [tempAdjustment, setTempAdjustment] = useState<{ change: number; reason: string } | null>(null);
+
+// Agrega estos estados arriba, con los otros useState
 
   // 1. CARGA DE DATOS (REFORZADA)
-  useEffect(() => {
-    // Cargar Usuarios: Buscamos tanto en 'users' (lista) como en 'user' (actual)
-    const savedUsers = localStorage.getItem('users');
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    } else {
-      const singleUser = localStorage.getItem('user');
-      if (singleUser) setUsers([JSON.parse(singleUser)]);
+useEffect(() => {
+  // Cargar Usuarios
+  const savedUsers = localStorage.getItem('users');
+  if (savedUsers) {
+    const loadedUsers = JSON.parse(savedUsers);
+    // Aseguramos que todos tengan pointsHistory (inicial vacío si no existe)
+    const usersWithHistory = loadedUsers.map((u: AdminUser) => ({
+      ...u,
+      pointsHistory: u.pointsHistory || []
+    }));
+    setUsers(usersWithHistory);
+  } else {
+    const singleUser = localStorage.getItem('user');
+    if (singleUser) {
+      const parsed = JSON.parse(singleUser);
+      setUsers([{
+        ...parsed,
+        pointsHistory: parsed.pointsHistory || []
+      }]);
     }
+  }
 
-    // Cargar Pedidos de todos los usuarios
-   // Busca esta parte dentro del useEffect de carga
-const savedAllOrders = localStorage.getItem('all_orders');
-if (savedAllOrders) {
-  const parsedOrders: AdminOrder[] = JSON.parse(savedAllOrders);
-  setOrders(parsedOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-}
-    // Cargar Productos
-    const savedProducts = localStorage.getItem('admin_products');
+  // Cargar Pedidos
+  const savedAllOrders = localStorage.getItem('all_orders');
+  if (savedAllOrders) {
+    const parsedOrders: AdminOrder[] = JSON.parse(savedAllOrders);
+    setOrders(parsedOrders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+  }
+
+  // Cargar Productos
+  const savedProducts = localStorage.getItem('admin_products');
   if (savedProducts) {
     setProducts(JSON.parse(savedProducts));
   } else {
-    // Si es la primera vez, cargamos los constantes y los guardamos
     setProducts(PRODUCTS);
     localStorage.setItem('admin_products', JSON.stringify(PRODUCTS));
   }
@@ -499,7 +518,209 @@ const handleCreateProduct = (e: React.FormEvent) => {
               </motion.div>
             </div>
           </div>
+{/* AJUSTE MANUAL DE PUNTOS – ULTRA PREMIUM XTREME */}
+<div className="mt-8 p-8 bg-gradient-to-br from-accent/5 to-accent/10 rounded-3xl border border-accent/30 shadow-2xl">
+  <h4 className="font-black text-accent text-2xl mb-6 flex items-center gap-4">
+    <motion.div
+      animate={{ rotate: [0, 10, -10, 0] }}
+      transition={{ duration: 4, repeat: Infinity }}
+    >
+      <Trophy size={32} strokeWidth={3} />
+    </motion.div>
+    Ajuste Manual de Puntos
+  </h4>
 
+  <div className="space-y-6">
+    <div>
+      <label className="text-sm font-black text-accent uppercase tracking-wider mb-2 block">
+        Cantidad de puntos
+      </label>
+      <p className="text-xs text-muted mb-2">Positivo = agregar • Negativo = quitar</p>
+      <input 
+        type="number" 
+        id={`points-adjust-${u.email}`}
+        placeholder="Ej: 100 o -50"
+        className="w-full px-3 py-2 text-sm font-medium bg-white rounded-lg border border-slate-200 focus:border-accent outline-none shadow-sm transition-all"
+      />
+    </div>
+
+    <div>
+      <label className="text-sm font-black text-accent uppercase tracking-wider mb-2 block">
+        Motivo del ajuste
+      </label>
+      <input 
+        type="text" 
+        id={`points-reason-${u.email}`}
+        placeholder="Ej: Regalo por evento / Corrección de error"
+        className="w-full px-3 py-2 text-sm font-medium bg-white rounded-lg border border-slate-200 focus:border-accent outline-none shadow-sm transition-all"
+      />
+    </div>
+
+    <Button 
+      variant="primary"
+      className="w-full py-3 text-lg font-black bg-gradient-to-r from-accent to-accent-dark hover:from-accent-dark hover:to-accent shadow-2xl hover:shadow-accent/40 transition-all"
+      onClick={() => {
+        const pointsInput = document.getElementById(`points-adjust-${u.email}`) as HTMLInputElement;
+        const reasonInput = document.getElementById(`points-reason-${u.email}`) as HTMLInputElement;
+        
+        const change = Number(pointsInput.value);
+        const reason = reasonInput.value.trim();
+
+        if (!change || change === 0 || !reason) {
+          // Abre modal de error
+          setShowErrorModal(true);
+          return;
+        }
+
+        // Guarda datos temporales para el modal de confirmación
+        setTempAdjustment({ change, reason });
+        setShowConfirmModal(true);
+      }}
+    >
+      <motion.span
+        whileHover={{ scale: 1.05 }}
+        className="flex items-center justify-center gap-3"
+      >
+        <Zap size={24} />
+        Hacer Ajuste
+      </motion.span>
+    </Button>
+  </div>
+</div>
+
+
+{/* MODAL DE ERROR – PREMIUM ROJO */}
+<AnimatePresence>
+  {showErrorModal && (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl border border-red-200 text-center"
+      >
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <AlertCircle size={80} className="text-red-500 mx-auto mb-6" />
+        </motion.div>
+        <h3 className="text-2xl font-black text-dark mb-4">Datos incompletos</h3>
+        <p className="text-muted mb-8">Debes ingresar una cantidad de puntos (distinta de 0) y un motivo válido.</p>
+        <Button 
+          variant="ghost"
+          className="mx-auto block w-full max-w-xs px-10 py-5 text-lg font-black text-dark border-4 border-slate-300 rounded-3xl shadow-2xl bg-white"
+          onClick={() => setShowErrorModal(false)}
+        >
+          Entendido
+        </Button>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
+
+{/* MODAL DE CONFIRMACIÓN – PREMIUM */}
+<AnimatePresence>
+  {showConfirmModal && tempAdjustment && (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-white rounded-3xl p-10 max-w-lg w-full shadow-2xl border border-accent/30"
+      >
+        <h3 className="text-3xl font-black text-accent text-center mb-8">
+          Confirmar Ajuste
+        </h3>
+
+        <div className="space-y-6 text-center">
+          <p className="text-xl font-bold">
+            {tempAdjustment.change > 0 ? 'Agregar' : 'Quitar'}{' '}
+            <span className={`text-4xl ${tempAdjustment.change > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+              {Math.abs(tempAdjustment.change)}
+            </span>{' '}
+            puntos
+          </p>
+          <p className="text-lg text-muted italic">
+            Motivo: "{tempAdjustment.reason}"
+          </p>
+        </div>
+
+        <div className="flex gap-4 mt-10">
+          <Button 
+            variant="ghost" 
+            className="flex-1 py-4 text-lg"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            variant="primary"
+            className="flex-1 py-4 text-lg font-black shadow-xl"
+            onClick={() => {
+              // EJECUTAR EL AJUSTE
+              updateUserPoints(u.email, u.points + tempAdjustment.change);
+
+              const newHistory = {
+                date: new Date().toISOString(), // Ej: "2025-12-24T10:30:45.123Z"
+                pointsChange: tempAdjustment.change,
+                reason: tempAdjustment.reason
+              };
+
+              setUsers(prev => prev.map(user => 
+                user.email === u.email 
+                  ? { ...user, pointsHistory: [...(user.pointsHistory || []), newHistory] }
+                  : user
+              ));
+
+              // Limpiar inputs
+              const pointsInput = document.getElementById(`points-adjust-${u.email}`) as HTMLInputElement;
+              const reasonInput = document.getElementById(`points-reason-${u.email}`) as HTMLInputElement;
+              pointsInput.value = '';
+              reasonInput.value = '';
+
+              setShowConfirmModal(false);
+              setShowSuccessModal(true);
+            }}
+          >
+            Confirmar Ajuste
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
+
+{/* MODAL DE ÉXITO – PREMIUM VERDE */}
+<AnimatePresence>
+  {showSuccessModal && (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.8, opacity: 0 }}
+        className="bg-white rounded-3xl p-12 max-w-md w-full shadow-2xl border border-emerald-200 text-center"
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+        >
+          <CheckCircle size={100} className="text-emerald-500 mx-auto mb-6" />
+        </motion.div>
+        <h3 className="text-3xl font-black text-dark mb-4">¡Ajuste realizado!</h3>
+        <p className="text-lg text-muted">Los puntos han sido actualizados correctamente.</p>
+        <Button 
+          variant="primary" 
+          className="mx-auto block w-full max-w-xs mt-8 px-10 py-4 text-lg font-black bg-emerald-600 hover:bg-emerald-700"
+          onClick={() => setShowSuccessModal(false)}
+        >
+          Cerrar
+        </Button>
+      </motion.div>
+    </div>
+  )}
+</AnimatePresence>
           {/* Nota – Sutil y elegante */}
           <motion.p 
             className="text-sm text-muted font-medium italic text-center opacity-80"
@@ -509,6 +730,7 @@ const handleCreateProduct = (e: React.FormEvent) => {
           >
             * Los cambios se reflejarán instantáneamente en la wallet del usuario.
           </motion.p>
+
         </motion.div> 
 
         {/* LADO DERECHO: INFO CARD PREMIUM – XTREME Style */}

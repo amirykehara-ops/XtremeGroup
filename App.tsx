@@ -18,6 +18,7 @@ import UserProfile from './pages/UserProfile';
 import DashboardAdmin from './pages/DashboardAdmin';
 import OrderHistory from './pages/OrderHistory';  
 import ExchangeHistory from './pages/ExchangeHistory';  
+import PointsHistory from './pages/PointsHistory';  
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -51,6 +52,7 @@ const App: React.FC = () => {
                 <Route path="/admin" element={<DashboardAdmin />} />
                 <Route path="/order-history" element={<OrderHistory />} />
                 <Route path="/exchange-history" element={<ExchangeHistory />} />
+                <Route path="/points-history" element={<PointsHistory />} />
                 <Route path="*" element={<Home />} />
 
               </Routes>
