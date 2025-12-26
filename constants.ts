@@ -14,6 +14,89 @@ import { Product, AVAILABLE_COLORS} from './types';
 ]
 */}
 
+// src/constants/subscriptions.ts
+
+export type SubscriptionType = 'regular' | 'prime_basic' | 'prime_pro';
+
+export interface SubscriptionBenefits {
+  name: string;
+  discount: number; 
+  discountcanjes: number; // porcentaje
+  pointsMultiplier: number;
+  freeShippingThreshold: number; // monto mínimo para envío gratis (0 = siempre, Infinity = nunca)
+  badge: string;
+  warrantyDays: number; // días de garantía extendida
+  referralBonus: number; // % extra en puntos por referido
+  earlyAccessHours: number; // horas antes para ofertas
+  stockReservation: boolean; // reserva stock en lanzamientos
+  volumePricing: 'none' | 'selected' | 'all'; // precios por volumen
+  smartManagement: 'none' | 'basic' | 'advanced'; // gestión inteligente
+  velocidadEnvio?: 'Estándar' | 'Prioritario' | 'Mismo Día'; // velocidad de envío
+}
+
+export const SUBSCRIPTION_BENEFITS: Record<SubscriptionType, SubscriptionBenefits> = {
+  regular: {
+    name: 'Regular',
+    discount: 5,
+    pointsMultiplier: 1,
+    freeShippingThreshold: Infinity, // S/ 10 - S/ 30
+    badge: 'Regular',
+    warrantyDays: 7,
+    referralBonus: 10,
+    earlyAccessHours: 0,
+    stockReservation: false,
+    volumePricing: 'none',
+    smartManagement: 'none',
+    velocidadEnvio: 'Estándar',
+    discountcanjes: 0
+  },
+  prime_basic: {
+    name: 'Prime Básico',
+    discount: 20,
+    pointsMultiplier: 1.5,
+    freeShippingThreshold: 300,
+    badge: 'Prime Básico',
+    warrantyDays: 180, // 6 meses
+    referralBonus: 10,
+    earlyAccessHours: 12,
+    stockReservation: false,
+    volumePricing: 'selected',
+    smartManagement: 'basic',
+    velocidadEnvio: 'Prioritario',
+    discountcanjes: 5
+  },
+  prime_pro: {
+    name: 'Prime Pro',
+    discount: 20,
+    pointsMultiplier: 3,
+    freeShippingThreshold: 0, // siempre gratis
+    badge: 'Prime Pro',
+    warrantyDays: 365, // 12 meses
+    referralBonus: 30,
+    earlyAccessHours: 48,
+    stockReservation: true,
+    volumePricing: 'all',
+    smartManagement: 'advanced',
+    velocidadEnvio: 'Mismo Día',
+    discountcanjes: 10,
+  }
+};
+
+// Función helper para obtener beneficios del usuario actual
+export const getUserBenefits = (subscription: SubscriptionType = 'regular'): SubscriptionBenefits => {
+  return SUBSCRIPTION_BENEFITS[subscription] || SUBSCRIPTION_BENEFITS.regular;
+};
+// Colores personalizados para cada suscripción (badges)
+export const SUBSCRIPTION_COLORS: Record<SubscriptionType, string> = {
+  regular: 'bg-gradient-to-r from-gray-400 to-gray-600',         // Silver elegante
+  prime_basic: 'bg-gradient-to-r from-accent to-accent-dark',   // Azul premium
+  prime_pro: 'bg-gradient-to-r from-yellow-400 to-amber-600'    // Gold épico
+};
+
+// Función helper para obtener el color del badge
+export const getSubscriptionColor = (subscription: SubscriptionType = 'regular'): string => {
+  return SUBSCRIPTION_COLORS[subscription] || SUBSCRIPTION_COLORS.regular;
+};
 
 // Navigation links for the main menu
 export const NAV_LINKS = [
@@ -22,7 +105,7 @@ export const NAV_LINKS = [
   { label: 'Clínica', path: '/clinica' },
   { label: 'Laboratorio', path: '/laboratorio' },
   { label: 'Nosotros', path: '/nosotros' },
-  { label: 'Catálogo', path: '/catalog' },
+  { label: 'Canjes', path: '/canjes' },
   {label: 'Suscripciones', path: '/suscripciones'}
 ];
 

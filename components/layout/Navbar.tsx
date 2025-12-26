@@ -7,6 +7,7 @@ import { useCart } from '../../contexts/CartContext';
 import AuthModal from '../ui/AuthModal';
 import { NAV_LINKS } from '../../constants';
 import Button from '../ui/Button';
+import { getUserBenefits, getSubscriptionColor } from '../../constants';
 
 
 const Navbar: React.FC = () => {
@@ -17,12 +18,11 @@ const Navbar: React.FC = () => {
   const location = useLocation();
   const { user, logout, login} = useUser();
   const { cartCount } = useCart();
+  const badgeColor = getSubscriptionColor(user?.subscription);
   // Función para obtener nivel, icono y color según puntos
-const getUserLevel = (points: number = 0) => {
-  if (points >= 1000) return { name: 'Gold', icon: '🏆', color: 'from-yellow-400 to-amber-600' };
-  if (points >= 500) return { name: 'Silver', icon: '🥈', color: 'from-gray-400 to-gray-600' };
-  return { name: 'Bronze', icon: '🥉', color: 'from-orange-600 to-amber-700' };
-};
+
+const benefits = getUserBenefits(user?.subscription);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
@@ -110,10 +110,10 @@ useEffect(() => {
         </Link>
       )}
                   <Link to="/profile" className="flex items-center gap-3 hover:scale-105 transition-all duration-300 cursor-pointer">
-  <div className={`flex items-center gap-1.5 bg-gradient-to-r ${getUserLevel(user.points).color} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md`}>
-    <span className="text-base">{getUserLevel(user.points).icon}</span>
-    <span>{getUserLevel(user.points).name}</span>
-  </div>
+<div className={`flex items-center gap-1.5 ${badgeColor} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md`}>
+  <Star size={16} />
+  <span>{benefits.badge}</span>
+</div>
 </Link>
   {/* Puntos con shimmer (mantengo tu animación épica) */}
   <div className="relative flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md overflow-hidden">
@@ -223,10 +223,10 @@ useEffect(() => {
 <div className="text-center">
   <Link to="/profile" className="block text-center mb-6">
   {/* Nivel grande */}
-  <div className={`inline-flex items-center gap-3 bg-gradient-to-r ${getUserLevel(user.points).color} text-white px-6 py-3 rounded-2xl font-bold shadow-lg text-xl`}>
-    <span className="text-3xl">{getUserLevel(user.points).icon}</span>
-    <span>{getUserLevel(user.points).name}</span>
-  </div>
+<div className={`inline-flex items-center gap-3 ${badgeColor} text-white px-6 py-3 rounded-2xl font-bold shadow-lg text-xl`}>
+  <Star size={32} />
+  <span>{benefits.badge}</span>
+</div>
   
   {/* Puntos debajo */}
   <div className="mt-4 text-3xl font-black text-accent bg-white/90 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-xl">
@@ -256,26 +256,39 @@ useEffect(() => {
         )}
       </AnimatePresence>
             {/* Modales de Auth */}
-    {showLogin && (
-      <AuthModal 
-        type="login" 
-        onClose={() => setShowLogin(false)} 
-        onAuthSuccess={(userData) => {
-          login(userData);           // ← Usa el login del contexto
-          setShowLogin(false);}}
-          login={login}
-      />
-    )}
-    {showRegister && (
-      <AuthModal 
-        type="register" 
-        onClose={() => setShowRegister(false)} 
-        onAuthSuccess={(userData) => {
-          login(userData);           // ← Usa el login del contexto
-          setShowRegister(false);}}
-          login={login} 
-      />
-    )}
+{showLogin && (
+  <AuthModal 
+    type="login" 
+    onClose={() => setShowLogin(false)} 
+    onAuthSuccess={(userData) => {
+      const fullUser = {
+        ...userData,
+        subscription: 'regular' as const,
+        subscriptionEndDate: null
+      };
+      login(fullUser);
+      setShowLogin(false);
+    }}
+    login={login}
+  />
+)}
+
+{showRegister && (
+  <AuthModal 
+    type="register" 
+    onClose={() => setShowRegister(false)} 
+    onAuthSuccess={(userData) => {
+      const fullUser = {
+        ...userData,
+        subscription: 'regular' as const,
+        subscriptionEndDate: null
+      };
+      login(fullUser);
+      setShowRegister(false);
+    }}
+    login={login} 
+  />
+)}
     </>
   );
 };

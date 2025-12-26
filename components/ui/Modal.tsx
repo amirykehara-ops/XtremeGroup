@@ -5,6 +5,7 @@ import { X, Check } from 'lucide-react';
 import { Product } from '../../types';
 import Button from './Button';
 import { useUser } from '../../contexts/UserContext';
+import { getUserBenefits, getSubscriptionColor } from '../../constants';
  // ← Agrega esto
 
 interface ModalProps {
@@ -20,15 +21,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, product }) => {
   const location = useLocation();
   const { user } = useUser();
 
-// Lógica de nivel (igual que en ProductDetail y grid)
-const getUserLevel = (points: number = 0) => {
-  if (points >= 1000) return { name: 'Gold', discount: 15, color: 'from-yellow-400 to-amber-600' };
-  if (points >= 500) return { name: 'Silver', discount: 10, color: 'from-gray-400 to-gray-600' };
-  return { name: 'Bronze', discount: 5, color: 'from-orange-600 to-amber-700' };
-};
-
-const userLevel = user ? getUserLevel(user.points || 0) : getUserLevel(0);
-const discountPercent = userLevel.discount;
+// NUEVA LÓGICA DE SUSCRIPCIÓN
+const benefits = getUserBenefits(user?.subscription || 'regular');
+const discountPercent = benefits.discount;
+const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
   React.useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -101,39 +97,34 @@ const discountPercent = userLevel.discount;
                           {user ? (
                             <div className="mt-6">
                               {/* Header azul fuerte con badge y ahorro extra */}
-                              <div className="bg-gradient-to-br from-accent to-accent-dark rounded-2xl p-6 shadow-xl relative overflow-hidden border border-accent-dark/50">
-                                {/* Brillo animado */}
-                                <motion.div 
-                                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
-                                  animate={{ x: ['-100%', '100%'] }}
-                                  transition={{ duration: 3, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
-                                />
+                              <div className={`${badgeColor} rounded-2xl p-6 shadow-xl relative overflow-hidden border`}>
+  {/* Brillo animado */}
 
-                                <div className="relative z-10 flex items-center justify-between gap-6">
-                                  <motion.div 
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.9 }}
-                                    className="text-white"
-                                  >
-                                    <p className="text-lg font-medium opacity-90">Precio Exclusivo</p>
-                                    <p className={`text-2xl font-black bg-gradient-to-r ${userLevel.color} bg-clip-text text-transparent`}>
-                                      {userLevel.name}
-                                    </p>
-                                  </motion.div>
+            <div className="mx-auto relative z-10 justify-between gap-4">
+              <motion.div 
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.9 }}
+                className="text-white"
+              >
+                <p className="text-lg font-black opacity-90">Precio Exclusivo</p>
+                <p className={`text-3xl font-black text-white bg-clip-text`}>
+                  {benefits.name}
+                </p>
+              </motion.div>
 
-                                  <motion.div 
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: 1 }}
-                                    className="text-right"
-                                  >
-                                    <p className="text-3xl font-black text-white whitespace-nowrap">
-                                      S/. {(product.price * (1 - discountPercent / 100)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                    </p>
-                                  </motion.div>
-                                </div>
-                              </div>
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1 }}
+                className="text-right"
+              >
+                <p className="text-3xl font-black text-white whitespace-nowrap">
+                  S/. {(product.price * (1 - discountPercent / 100)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+              </motion.div>
+            </div>
+          </div>
 
 
                             </div>

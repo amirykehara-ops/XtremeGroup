@@ -6,7 +6,8 @@ import { useUser } from '../contexts/UserContext';
 import Button from '../components/ui/Button';
 import { getUserLevel } from '../constants';
 import { Link } from 'react-router-dom';
-import { Trophy, Star, Crown, Copy, CheckCircle, Gift, Zap, Shield, ArrowUpRight, User, Package } from 'lucide-react';
+import { getUserBenefits, getSubscriptionColor } from '../constants';
+import { Trophy, Star, Crown, Copy, CheckCircle, Gift, Zap, Shield, ArrowUpRight, User, Package, ChevronRight } from 'lucide-react';
 
 interface FormData {
   name: string;
@@ -19,18 +20,22 @@ const UserProfile: React.FC = () => {
   const { user, updateUser } = useUser();
 
   const userPoints = user?.points || 0;
-  const userLevel = getUserLevel(userPoints);
-  const discountPercent = userLevel.discount;
 
-  const nextLevelPoints = userLevel.name === 'Bronze' ? 500 : userLevel.name === 'Silver' ? 1000 : null;
-  const progress = nextLevelPoints ? Math.min((userPoints / nextLevelPoints) * 100, 100) : 100;
+  // Nueva lógica de suscripción
+  const benefits = getUserBenefits(user?.subscription || 'regular');
+  const discountPercent = benefits.discount;
 
-  const benefits = {
-    Bronze: ['5% descuento en todo', 'Acceso a ofertas flash', 'Soporte estándar'],
-    Silver: ['10% descuento exclusivo', 'Envío gratis > S/500', 'Soporte prioritario', 'Acceso anticipado a lanzamientos'],
-    Gold: ['15% descuento VIP', 'Envío gratis siempre', 'Soporte 24/7 dedicado', 'Regalos exclusivos', 'Invitaciones a eventos']
-  }[userLevel.name];
+  // Fecha de vencimiento: Simulada (luego con Mercado Pago será real)
+  const startDate = new Date(); // Simulado: fecha de compra hoy
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + 365);
+  const formattedEndDate = endDate.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
 
+  // Barra de "Progreso a Máximo Ahorro" (incentivo para subir)
+  const currentSavingsPercent = user.subscription === 'regular' ? 30 : user.subscription === 'prime_basic' ? 70 : 100; // Regular 30%, Básico 70%, Pro 100%
+  const progress = currentSavingsPercent;
+  const estimatedAnnualSavings = user.subscription === 'regular' ? 600 : user.subscription === 'prime_basic' ? 2400 : 4200;
+  const maxAnnualSavings = 4200; 
   const [referralCode, setReferralCode] = useState(user?.referralCode || '');
   const [copied, setCopied] = useState(false);
 
@@ -98,9 +103,8 @@ const UserProfile: React.FC = () => {
   <motion.div 
     animate={{ 
       background: [
-        "radial-gradient(circle at 20% 20%, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%)",
+
         "radial-gradient(circle at 80% 80%, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%)",
-        "radial-gradient(circle at 20% 20%, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%)"
       ] 
     }}
     transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
@@ -124,26 +128,35 @@ const UserProfile: React.FC = () => {
         <h2 className="text-2xl text-white font-bold mb-6">Tu Estatus VIP</h2>
         
         <div className="flex items-center gap-6">
-          <motion.div 
-            animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            className="text-7xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
-          >
-            {userLevel.name === 'Gold' ? <Crown className="text-yellow-400" size={72} /> : 
-             userLevel.name === 'Silver' ? <Trophy className="text-slate-300" size={72} /> : 
-             <Trophy className="text-orange-500" size={72} />}
-          </motion.div>
+        <motion.div 
+          animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="text-7xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+        >
+          {user.subscription === 'prime_pro' ? <Crown className="text-amber-400" size={72} /> : 
+          user.subscription === 'prime_basic' ? <Trophy className="text-accent" size={72} /> : 
+          <Trophy className="text-slate-300" size={72} />}
+        </motion.div>
 
-          <div className="flex flex-col">
-            <p className={`text-6xl font-black bg-gradient-to-r ${userLevel.color} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
-              {userLevel.name}
-            </p>
-            <p className="text-lg text-white font-bold flex items-center gap-2 mt-2">
-              <span className="h-2 w-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]" />
-              {discountPercent}% Descuento Exclusivo
-            </p>
-          </div>
+        <div className="flex flex-col">
+          <p className={`text-6xl font-black bg-gradient-to-r ${getSubscriptionColor(user.subscription)} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
+            {benefits.name}
+          </p>
+<p className="text-lg text-white font-bold flex items-center gap-2 mt-2">
+  <span className="h-2 w-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]" />
+  
+  {user.subscription === 'regular' ? (
+    'Sin fecha de expiración'
+  ) : (
+    <>
+      Prime hasta: <strong>{formattedEndDate}</strong>
+    </>
+  )}
+</p>
+
+
         </div>
+      </div>
       </div>
 
       <div className="text-accent bg-white px-6 py-4 rounded-2xl shadow-[0_0_10px_rgba(255,255,255,0.3)]">
@@ -160,37 +173,107 @@ const UserProfile: React.FC = () => {
 
     
 
-            {/* Barra de progreso premium */}
-            <div className="mb-8">
-              <div className="flex justify-between text-sm text-white font-medium mb-3">
-                <span>Nivel actual</span>
-                <span>{nextLevelPoints ? `Siguiente: ${userLevel.name === 'Bronze' ? 'Silver' : 'Gold'}` : 'Nivel máximo'}</span>
-              </div>
-              <div className="h-8 bg-slate-200 rounded-full overflow-hidden shadow-inner">
-                <motion.div 
-                  className="h-full bg-gradient-to-r from-accent to-accent-dark relative overflow-hidden"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 2, ease: "easeOut" }}
-                >
-                  <div className="absolute inset-0 bg-white/30 animate-pulse" />
-                </motion.div>
-              </div>
-              <p className="text-center mt-3 text-white font-medium mb-8">
-                {nextLevelPoints ? (
-                  <span>Faltan <strong className="text-accent bg-white px-2 py-0.5 rounded-md shadow-[0_0_10px_rgba(255,255,255,0.3)]">{nextLevelPoints - userPoints}</strong> puntos para el siguiente nivel</span>
-                ) : (
-                  <span className="text-accent font-bold">¡Has alcanzado el nivel máximo! 🏆</span>
-                )}
-              </p>
-            </div>
-
+{/* Barra de Progreso a Máximo Ahorro – Nueva versión PODEROSA */}
+<div className="mb-8">
+  <div className="flex justify-between text-sm text-white font-medium mb-3">
+    <span>Tu Progreso XTREME</span>
+    <span>{progress}% hacia Prime Pro</span>
+  </div>
+  <div className="relative h-10 bg-slate-200 rounded-full overflow-hidden shadow-inner mt-4">
+    <motion.div 
+      className="h-full bg-gradient-to-r from-accent to-accent-dark relative overflow-hidden"
+      initial={{ width: 0 }}
+      animate={{ width: `${progress}%` }}
+      transition={{ duration: 2, ease: "easeOut" }}
+    >
+      <div className="absolute inset-0 bg-white/30 animate-pulse" />
+      {/* Badges en el progreso */}
+            {progress == 30 && (
+        <motion.span 
+          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+        >
+          Regular
+        </motion.span>
+      )}
+      {progress ==70 && (
+        <motion.span 
+          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+        >
+          Prime Básico
+        </motion.span>
+      )}
+      {progress == 100 && (
+        <motion.span 
+          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+        >
+          Prime Pro
+        </motion.span>
+      )}
+    </motion.div>
+  </div>
+<p className="text-center mt-3 text-white font-medium mb-8 mt-8">
+  {user.subscription === 'prime_pro' ? (
+    <span className="text-ghost font-bold text-2xl">¡Máximo nivel alcanzado! 🏆</span>
+  ) : user.subscription === 'prime_basic' ? (
+    <span className="text-lg mt-4">
+      Mejora a <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> Prime Pro</strong> 
+      <span className="mx-1">para desbloquear</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 20% descuento</strong> 
+      <span className="mx-1">y</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 3x puntos</strong>
+    </span>
+  ) : (
+    <span className="text-lg">
+      Mejora a <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> Prime Básico</strong> 
+      <span className="mx-1">para desbloquear</span> <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 10% descuento</strong> 
+     <span className="mx-1">y</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 2x puntos</strong>
+    </span>
+  )}
+</p>
+{/* REGULAR / PRIME BASIC */}
+{(user.subscription === 'regular' || user.subscription === 'prime_basic') && (
+  <div className="md:col-span-3 flex justify-center mt-8 mb-16">
+    <Link to="/suscripciones">
+      <Button
+        variant="primary"
+        className="px-10 py-5 text-lg font-black bg-blue text-accent hover:bg-accent hover:text-white flex items-center gap-2 shadow-xl rounded-3xl"
+      >
+        {user.subscription === 'regular'
+          ? 'Mejorar a Prime'
+          : 'Mejorar a Prime Pro'}
+        <ChevronRight size={24} />
+      </Button>
+    </Link>
+  </div>
+)}
+</div>
 {/* Beneficios premium */}
 <h3 className="text-2xl text-white font-bold mb-8">Beneficios Exclusivos</h3>
 
 {/* Este es el grid de beneficios */}
 <div className="grid md:grid-cols-2 gap-6">
-  {benefits.map((benefit, i) => (
+  {[
+    `${benefits.discount}% Descuento en Catálogo`,
+    `Puntos por Compra: ${benefits.pointsMultiplier}x`,
+    benefits.freeShippingThreshold === 0 
+      ? 'Envío Gratis TOTAL' 
+      : benefits.freeShippingThreshold === Infinity 
+        ? 'Envío Estándar' 
+        : `Envío Gratis > S/${benefits.freeShippingThreshold}`,
+    `Garantía Extendida: ${benefits.warrantyDays} días`,
+    `Referidos: ${benefits.referralBonus}% Puntos por Invitación`,
+    benefits.earlyAccessHours > 0 ? `${benefits.earlyAccessHours}h antes en Ofertas` : 'Acceso Público a Ofertas',
+    benefits.stockReservation ? 'Stock Reservado en Lanzamientos' : 'Acceso Normal',
+    benefits.volumePricing === 'all' ? 'Precios Mayoristas en TODO' : benefits.volumePricing === 'selected' ? 'Precios con descuento en seleccionados' : 'Precio de Lista',
+    benefits.smartManagement === 'advanced' ? 'Optimización de Negocio' : benefits.smartManagement === 'basic' ? 'Monitor de Ahorros' : 'Gestión Básica',
+    benefits.discountcanjes > 0 ? `Descuento en Canjes: ${benefits.discountcanjes}%` : 'Sin Descuento en Canjes',
+    benefits.velocidadEnvio ? `Velocidad de Envío: ${benefits.velocidadEnvio}` : 'Velocidad de Envío: Estándar'
+
+  ].map((benefit, i) => (
     <motion.div 
       key={i}
       initial={{ opacity: 0, x: -30 }}

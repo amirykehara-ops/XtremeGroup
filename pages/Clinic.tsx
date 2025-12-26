@@ -1,13 +1,13 @@
   import React, { useState, useEffect } from 'react';
   import { motion, AnimatePresence } from 'framer-motion';
-  import { Filter, Search, ChevronRight, Package, Truck, Tag, ArrowDownUp } from 'lucide-react';
+  import { Filter, Search, ChevronRight, Package, Truck, Tag, ArrowDownUp, Star } from 'lucide-react';
   import { PRODUCTS } from '../constants';
   import Button from '../components/ui/Button';
   import Modal from '../components/ui/Modal';
   import { Product } from '../types'
   import { Link } from 'react-router-dom';  // ← ESTA LÍNEA ES LA CLAVE
   import { useUser } from '../contexts/UserContext';
-  import { getUserLevel } from '../constants'; // ← Añade esta línea
+  import { getUserBenefits, getSubscriptionColor} from '../constants'; // ← Añade esta línea
 
 const Clinic: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -42,8 +42,10 @@ const Clinic: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('Todos');
   const { user } = useUser();
 
-  const userLevel = user ? getUserLevel(user.points || 0) : getUserLevel(0);
-  const discountPercent = userLevel.discount;
+  // NUEVA LÓGICA DE SUSCRIPCIÓN
+const benefits = getUserBenefits(user?.subscription || 'regular');
+const discountPercent = benefits.discount;
+const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
 
   // Paginación
   const [currentPage, setCurrentPage] = useState(1);
@@ -312,18 +314,19 @@ const Clinic: React.FC = () => {
           
           <div className="relative pt-4 border-t border-slate-50">
             {/* Badge nivel – Solo con sesión y descuento, esquina superior derecha */}
-            {user && discountPercent > 0 && (
-              <div className="absolute bottom-0 right-0 mb-12 mr-2 z-10">
-                <motion.span 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className={`text-xs font-bold text-white px-3 py-1.5 rounded-full bg-gradient-to-r ${userLevel.color} shadow-lg`}
-                >
-                  -{discountPercent}% {userLevel.name}
-                </motion.span>
-              </div>
-            )}
+{user && discountPercent > 0 && (
+  <div className="absolute top-4 right-4 z-10">
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 300 }}
+      className={`flex items-center gap-1.5 ${badgeColor} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg`}
+    >
+      <Star size={14} />
+      <span>-{discountPercent}% {benefits.name}</span>
+    </motion.div>
+  </div>
+)}
 
             <div className="flex items-end justify-between">
               <div>

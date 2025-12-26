@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, SlidersHorizontal, ArrowUpRight, ArrowDownUp } from 'lucide-react';
+import { Search, SlidersHorizontal, ArrowUpRight, ArrowDownUp, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { Product } from '../types';
 import { useUser } from '../contexts/UserContext';
-import { getUserLevel } from '../constants'; // o '../constants/index' según tu estructura
+import { getUserBenefits, getSubscriptionColor } from '../constants';
 
 const Equipment: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -31,8 +31,10 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
 
   // Lógica de nivel y descuento (igual que en ProductDetail)
 
-  const userLevel = user ? getUserLevel(user.points || 0) : getUserLevel(0);
-  const discountPercent = userLevel.discount;
+// NUEVA LÓGICA DE SUSCRIPCIÓN
+  const benefits = getUserBenefits(user?.subscription || 'regular');
+  const discountPercent = benefits.discount;
+  const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
   const productsPerPage = 8; // Cambia aquí si quieres más o menos por página
 
   useEffect(() => {
@@ -253,17 +255,18 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
                       {/* Badge nivel – Encima del botón "Ver" (esquina inferior derecha) */}
                       {/* Badge y precio con descuento – Solo si hay sesión iniciada */}
                       {user && discountPercent > 0 && (
-                        <div className="absolute bottom-0 right-0 mb-12 mr-2 z-10">
-                          <motion.span 
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ type: "spring", stiffness: 300 }}
-                            className={`text-xs font-bold text-white px-3 py-1.5 rounded-full bg-gradient-to-r ${userLevel.color} shadow-lg`}
-                          >
-                            -{discountPercent}% {userLevel.name}
-                          </motion.span>
-                        </div>
-                      )}
+                      <div className="absolute top-3 right-3 z-10">
+                        <motion.div 
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                          className={`flex items-center gap-1.5 ${badgeColor} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-lg`}
+                        >
+                          <Star size={14} />
+                          <span>-{discountPercent}% {benefits.name}</span>
+                        </motion.div>
+                      </div>
+                    )}
 
                       <div className="flex items-end justify-between">
                         <div>

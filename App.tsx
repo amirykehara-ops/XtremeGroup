@@ -9,7 +9,7 @@ import About from './pages/About';
 import { CartProvider } from './contexts/CartContext';
 import { UserProvider } from './contexts/UserContext';
 import ProductDetail from './pages/ProductDetail';
-import Catalog from './pages/Catalog';
+import Canjes from './pages/Canjes';
 import CartIcon from './components/ui/CartIcon';
 import Checkout from './pages/Checkout';  // ← Añade este import arriba
 import PaymentFailed from './pages/PaymentFailed';
@@ -40,7 +40,7 @@ const App: React.FC = () => {
             <main className="flex-grow">
               <Routes>
                 <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/catalog" element={<Catalog />} />
+                <Route path="/canjes" element={<Canjes />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/equipamiento" element={<Equipment />} />
                 <Route path="/clinica" element={<Clinic />} />

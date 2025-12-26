@@ -8,7 +8,9 @@ interface User {
   phone?: string;
   address?: string;
   referralCode?: string;
-  level?: 'Bronze' | 'Silver' | 'Gold';
+  subscription: 'regular' | 'prime_basic' | 'prime_pro';
+  subscriptionEndDate: string | null;
+
 }
 
 interface UserContextType {
@@ -24,16 +26,68 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
 
   // 1. CARGA INICIAL: Usaremos siempre 'currentUser' para la sesión activa
+  // 1. CARGA INICIAL + MIGRACIÓN AUTOMÁTICA A SUSCRIPCIONES
   useEffect(() => {
     const saved = localStorage.getItem('currentUser');
     if (saved) {
       try {
-        setUser(JSON.parse(saved));
+        let currentUser = JSON.parse(saved);
+
+        // === MIGRACIÓN: Si no tiene subscription, lo ponemos en Regular ===
+        if (!currentUser.subscription) {
+          currentUser.subscription = 'regular';
+          currentUser.subscriptionEndDate = null;
+          // Guardamos la versión migrada
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
+        setUser(currentUser);
       } catch (e) {
+        console.error('Error cargando currentUser', e);
         localStorage.removeItem('currentUser');
       }
     }
-  }, []);
+  }, []); 
+
+    // 2. MIGRACIÓN GLOBAL: Todos los usuarios en la base pasan a 'regular' si no tienen subscription
+  useEffect(() => {
+    // Ejecutamos solo una vez (no depende de nada)
+    const migrateAllUsers = () => {
+      const keys = ['all_users', 'users']; // Tus posibles claves
+      let migrated = false;
+
+      keys.forEach(key => {
+        const data = localStorage.getItem(key);
+        if (data) {
+          try {
+            let users = JSON.parse(data);
+            users = users.map((u: any) => {
+              if (!u.subscription) {
+                migrated = true;
+                return {
+                  ...u,
+                  subscription: 'regular',
+                  subscriptionEndDate: null
+                };
+              }
+              return u;
+            });
+            localStorage.setItem(key, JSON.stringify(users));
+          } catch (e) {
+            console.error(`Error migrando ${key}`, e);
+          }
+        }
+      });
+
+      // Guardamos también en 'all_users' por si acaso (unificamos)
+      if (migrated) {
+        const finalUsers = JSON.parse(localStorage.getItem('all_users') || localStorage.getItem('users') || '[]');
+        localStorage.setItem('all_users', JSON.stringify(finalUsers));
+      }
+    };
+
+    migrateAllUsers();
+  }, []); // [] = se ejecuta solo una vez al montar la app
 
   // 2. SINCRONIZACIÓN: Si el Admin cambia algo en 'all_users', la sesión se entera
   useEffect(() => {
@@ -62,13 +116,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
 
     // A. Nuevo estado del usuario
-    const newUser = { ...user, ...updatedUserData };
-    
-    // Si cambiaron los puntos, recalculamos el nivel por si acaso
-    if (updatedUserData.points !== undefined) {
-      const p = updatedUserData.points;
-      newUser.level = p >= 1000 ? 'Gold' : p >= 500 ? 'Silver' : 'Bronze';
-    }
+        const newUser = {
+      ...user,
+      ...updatedUserData,
+      // Aseguramos que subscriptionEndDate sea string o null
+      subscriptionEndDate: updatedUserData.subscriptionEndDate ?? user.subscriptionEndDate
+    };
 
     // B. Guardar sesión activa
     setUser(newUser);

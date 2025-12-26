@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, ShieldCheck, Truck, CreditCard, PenTool } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Truck, CreditCard, PenTool, Star, Check} from 'lucide-react';
 import Button from '../components/ui/Button';
 import { PRODUCTS } from '../constants';
 import Modal from '../components/ui/Modal';
 import { Product } from '../types';
+import { getUserBenefits, getSubscriptionColor } from '../constants';
+import { Link } from 'react-router-dom';
 
 const Particle: React.FC<{ delay: number }> = ({ delay }) => (
   <motion.div
@@ -344,7 +346,148 @@ const featuredProducts = allProducts.slice(0, 4);
           </motion.div>
         </div>
       </section>
+            {/* SECCIÓN PREMIUM: Preview de Suscripciones XTREME PRIME */}
+      <section className="py-32 px-6 bg-gradient-to-b from-white to-slate-50 overflow-hidden relative">
+        {/* Partículas decorativas */}
+        <div className="absolute inset-0 pointer-events-none">
+          {Array.from({ length: 12 }).map((_, i) => (
+            <Particle key={i} delay={i * 0.6} />
+          ))}
+        </div>
 
+        <div className="max-w-[1400px] mx-auto relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-20"
+          >
+            <h2 className="text-5xl md:text-7xl font-black text-dark mb-6">
+              Membresías <span className="text-accent">XTREME PRIME</span>
+            </h2>
+            <p className="text-xl text-muted max-w-3xl mx-auto">
+              Multiplica tus beneficios: descuentos exclusivos, puntos acelerados y ventajas VIP para profesionales como tú.
+            </p>
+          </motion.div>
+
+          {/* Grid de 3 planes */}
+          <div className="grid md:grid-cols-3 gap-10 mb-16">
+            {[
+              {
+                name: 'Regular',
+                badge: 'Acceso Básico',
+                price: 'Gratis',
+                discount: '5%',
+                points: '1x',
+                shipping: 'Envío: Estándar',
+                color: 'from-gray-400 to-gray-600',
+                recommended: false
+              },
+              {
+                name: 'Prime Básico',
+                badge: 'Más Popular',
+                price: 'S/ 350',
+                subprice: '/año',
+                discount: '10%',
+                points: '2x',
+                shipping: 'Envío: Gratis > S/300',
+                color: 'from-accent to-accent-dark',
+                recommended: true
+              },
+              {
+                name: 'Prime Pro',
+                badge: 'Élite',
+                price: 'S/ 800',
+                subprice: '/año',
+                discount: '20% VIP',
+                points: '3x',
+                shipping: 'Envío: Gratis TOTAL',
+                color: 'from-yellow-400 to-amber-600',
+                recommended: true
+              }
+            ].map((plan, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.2, duration: 0.8, type: "spring", stiffness: 100 }}
+                whileHover={{ y: -15, scale: 1.03 }}
+                className={`relative p-10 rounded-3xl shadow-2xl border-2 flex flex-col transition-all duration-500 ${
+                  plan.recommended 
+                    ? plan.name === 'Prime Pro' 
+                      ? 'bg-gradient-to-br from-yellow-50 to-amber-50 border-amber-500 ring-8 ring-amber-200 scale-105 z-10' 
+                      : 'bg-gradient-to-br from-accent/10 to-white border-accent ring-8 ring-accent/20 scale-105 z-10'
+                    : 'bg-white border-slate-200'
+                }`}
+              >
+                {plan.recommended && (
+                  <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-accent text-white px-6 py-2 rounded-full text-sm font-black uppercase tracking-widest shadow-2xl">
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div className="text-center mb-8">
+                  <div className={`inline-flex items-center gap-3 text-white px-6 py-3 rounded-full font-bold shadow-lg bg-gradient-to-r ${plan.color}`}>
+                    <Star size={24} />
+                    <span className="text-xl">{plan.name}</span>
+                  </div>
+                </div>
+
+                <div className="text-center mb-10">
+                  <p className="text-5xl font-black text-dark">
+                    {plan.price}
+                  </p>
+                  {plan.subprice && <p className="text-muted mt-2">{plan.subprice}</p>}
+                </div>
+
+                <ul className="space-y-5 mb-12 flex-1">
+                  <li className="flex items-center gap-4 text-dark">
+                    <Check size={20} className="text-green-500" />
+                    <span><strong>{plan.discount}</strong> Descuento</span>
+                  </li>
+                  <li className="flex items-center gap-4 text-dark">
+                    <Check size={20} className="text-green-500" />
+                    <span><strong>{plan.points}</strong> Puntos por compra</span>
+                  </li>
+                  <li className="flex items-center gap-4 text-dark">
+                    <Check size={20} className="text-green-500" />
+                    <span>{plan.shipping}</span>
+                  </li>
+                </ul>
+
+                <Link to="/suscripciones" className="mt-auto">
+                  <Button 
+                    variant={plan.recommended ? "primary" : "ghost"}
+                    className={`w-full py-5 text-lg font-black rounded-2xl ${
+                      plan.recommended ? '' : 'border-2 border-accent hover:bg-accent hover:text-white'
+                    }`}
+                  >
+                    {plan.name === 'Regular' ? 'Tu Plan Actual' : 'Elegir Plan'}
+                    <ChevronRight size={20} className="ml-2" />
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* CTA Final de la sección */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center"
+          >
+            <Link to="/suscripciones">
+              <Button variant="primary" className="mx-auto flex items-center px-12 py-6 text-2xl font-black shadow-2xl shadow-accent/40">
+                Descubre Todos los Beneficios PRIME
+                <ChevronRight size={28} className="ml-4" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
       {/* Newsletter */}
       <section className="py-24 px-6 bg-slate-900 text-white text-center">
         <div className="max-w-2xl mx-auto">

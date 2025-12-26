@@ -9,6 +9,7 @@ import {
   ShieldCheck, Rocket, Timer, Percent, CreditCard,
   ShoppingBag, Star, Heart, ZapOff, DollarSign, Users, BarChart3
 } from 'lucide-react';
+import AuthModal from '../components/ui/AuthModal';
 
 // Partículas sutiles (idénticas a Home)
 const Particle: React.FC<{ delay: number }> = ({ delay }) => (
@@ -62,13 +63,27 @@ const InfoTooltip = ({ title, desc }: { title: string; desc: string }) => {
 };
 
 const SubscriptionPlans: React.FC = () => {
-  const { user } = useUser();
+  const { user, updateUser } = useUser();
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [authType, setAuthType] = useState<'login' | 'register'>('login'); // Nuevo estado para cambiar entre login/register
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
+  
 
   useEffect(() => {
-    if (!user) {
-      setShowLoginModal(true);
+    // Solo mostramos el modal si el user está DEFINITIVAMENTE null
+    // (no si está cargando)
+    if (user === null) {
+      // Pero esperamos un poquito a que localStorage cargue
+      const timer = setTimeout(() => {
+        if (!user) { // doble chequeo
+          setShowLoginModal(true);
+        }
+      }, 100); // 100ms es suficiente para que UserProvider cargue
+
+      return () => clearTimeout(timer);
+    } else {
+      // Si ya hay user, aseguramos que el modal esté cerrado
+      setShowLoginModal(false);
     }
   }, [user]);
 
@@ -76,9 +91,10 @@ const SubscriptionPlans: React.FC = () => {
     { feature: "Descuento en Catálogo", regular: "5%", basic: "10%", pro: "20% VIP" },
     { feature: "Velocidad de Envío", regular: "Estándar", basic: "Prioritario", pro: "Same-Day (Mismo día)" },
     { feature: "Costo de Envío", regular: "S/ 10.00 - S/ 30.00", basic: "Gratis > S/300", pro: "Gratis TOTAL" },
-    { feature: "Puntos por Compra", regular: "1x", basic: "1.5x", pro: "3x (Triple)" },
+    { feature: "Puntos por Compra", regular: "1x", basic: "2x", pro: "3x (Triple)" },
+    {feature: "Descuento en Mercado de Canjes", regular: <X className="text-red-400 mx-auto" size={18}/>, basic: "5%", pro: "10%" },
     { feature: "Garantía Extendida", regular: "7 días", basic: "6 meses", pro: "12 meses" },
-    { feature: "Puntos por Referido", regular: "Estándar", basic: "10% más", pro: "15% más" },
+    { feature: "Puntos por Referido", regular: "10%", basic: "20%", pro: "30%" },
     { feature: "Acceso a Ofertas", regular: "Público", basic: "12h antes", pro: "48h antes + Stock Reservado" },
     { feature: "Precios por Volumen", regular: "Precio de Lista", basic: "Tarifa con descuento en Insumos seleccionados.", pro: "Tarifa Mayorista desbloqueada en TODO el catálogo."},
     { feature: "Gestión Inteligente", regular: <X className="text-red-400 mx-auto" size={18}/>,  basic: { title: "Monitor de Ahorros", desc: "Alertas de reposición y ahorro real." }, pro: { title: "Optimización de Negocio", desc: "Data avanzada y reportes contables." } }
@@ -119,36 +135,67 @@ const SubscriptionPlans: React.FC = () => {
     }
   ];
 
-  // Modal login
-  if (showLoginModal) {
-    return (
-      <AnimatePresence>
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-3xl p-10 max-w-md w-full shadow-2xl border border-accent/20 text-center"
-          >
-            <AlertCircle size={80} className="text-accent mx-auto mb-6" />
-            <h3 className="text-3xl font-black text-dark mb-4">Inicia Sesión</h3>
-            <p className="text-lg text-muted mb-8">
-              Accede para activar tu plan PRIME.
-            </p>
-            <Link to="/login">
-              <Button variant="primary" className="w-full py-4 text-lg font-black">
-                Iniciar Sesión
-              </Button>
-            </Link>
-            <Button variant="ghost" className="w-full py-4 text-lg font-black mt-4" onClick={() => setShowLoginModal(false)}>
-              Continuar como Invitado
-            </Button>
-          </motion.div>
-        </div>
-      </AnimatePresence>
-    );
-  }
+// MODAL INICIAL: Elegir acción (Login, Registro o Invitado)
+if (showLoginModal) {
+  return (
+    <AnimatePresence>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header con icono */}
+          <div className="bg-gradient-to-br from-accent to-accent-dark p-8 text-center">
+            <ShieldCheck size={60} className="text-white mx-auto mb-4" />
+            <h3 className="text-3xl font-black text-white">Acceso XTREME PRIME</h3>
+            <p className="text-white/80 mt-2">Elige cómo quieres continuar</p>
+          </div>
 
+          {/* Opciones */}
+          <div className="p-8 space-y-4">
+            {/* Iniciar Sesión */}
+            <Button
+              variant="primary"
+              className="w-full py-4 text-lg font-black"
+              onClick={() => {
+                setShowLoginModal(false);
+                // Abrimos el AuthModal real en modo login
+                // Usamos dispatchEvent para activar el modal global (como haces en otros lugares)
+                window.dispatchEvent(new Event('openLoginModal'));
+              }}
+            >
+              Iniciar Sesión
+            </Button>
+
+            {/* Registrarse */}
+            <Button
+              variant="ghost"
+              className="w-full py-4 text-lg font-black border-2 border-accent hover:bg-accent hover:text-white"
+              onClick={() => {
+                setShowLoginModal(false);
+                window.dispatchEvent(new Event('openRegisterModal'));
+              }}
+            >
+              Registrarse
+            </Button>
+
+            {/* Continuar como invitado */}
+            <Button
+              variant="ghost"
+              className="w-full py-4 text-lg font-black border-2 border-accent hover:bg-accent hover:text-white"
+              onClick={() => setShowLoginModal(false)}
+            >
+              Continuar como invitado
+            </Button>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  );
+}
   return (
     <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen relative overflow-hidden">
       {/* Partículas */}
@@ -205,13 +252,34 @@ const SubscriptionPlans: React.FC = () => {
               )}
             </div>
 
-            <Button 
-              variant={plan.btnVariant}
-              className="w-full mt-auto py-4 text-lg font-black"
-              onClick={() => alert("Checkout")}
-            >
-              {plan.btnText}
-            </Button>
+<Button 
+  variant={plan.btnVariant}
+  className="w-full mt-auto py-4 text-lg font-black"
+  onClick={() => {
+    if (!user) {
+      alert("Primero inicia sesión para probar los planes");
+      return;
+    }
+
+    // Cambiamos la suscripción del usuario (solo para testing)
+    const newSubscription = plan.id === 'regular' ? 'regular' : 
+                           plan.id === 'basic' ? 'prime_basic' : 
+                           'prime_pro';
+
+    const today = new Date();
+    const endDate = plan.id === 'regular' ? null : 
+                    new Date(today.setFullYear(today.getFullYear() + 1)).toISOString();
+
+    updateUser({
+      subscription: newSubscription,
+      subscriptionEndDate: endDate
+    });
+
+    alert(`¡Ahora eres ${plan.name}! Recarga la página para ver los cambios en navbar, perfil, etc.`);
+  }}
+>
+  {plan.btnText}
+</Button>
           </motion.div>
         ))}
       </div>

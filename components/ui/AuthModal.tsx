@@ -40,7 +40,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ type, onClose, onAuthSuccess, log
       email,
       password,
       points: 600,
-      name: name.trim()  // Limpia espacios
+      name: name.trim()
+    // Limpia espacios
     };
 
     users.push(newUser);

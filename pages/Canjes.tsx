@@ -449,7 +449,7 @@ const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
         </p>
         <Button variant="primary" className="w-full py-4 text-lg bg-white text-red-600 hover:bg-white/90" onClick={() => {
           setShowInsufficient(false);
-          navigate('/catalog');
+          navigate('/canjes');
         }}>
           Ir a Comprar y Ganar Puntos
         </Button>
