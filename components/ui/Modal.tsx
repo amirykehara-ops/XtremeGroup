@@ -96,33 +96,38 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
                                                     {/* Precio con descuento por nivel – Consistente con tu web, profesional y impactante */}
                           {user ? (
                             <div className="mt-6">
-                              {/* Header azul fuerte con badge y ahorro extra */}
-                              <div className={`${badgeColor} rounded-2xl p-6 shadow-xl relative overflow-hidden border`}>
-  {/* Brillo animado */}
+{/* PRECIO EXCLUSIVO PREMIUM – Mantiene tu estructura y colores, pero más impactante */}
+<div className={`${badgeColor} rounded-2xl p-6 shadow-xl relative overflow-hidden border-2 border-white/20`}>
+  {/* Brillo sutil animado */}
+  <motion.div 
+    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+    animate={{ x: ['-100%', '300%'] }}
+    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+  />
 
-            <div className="mx-auto relative z-10 justify-between gap-4">
-              <motion.div 
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.9 }}
-                className="text-white"
-              >
-                <p className="text-lg font-black opacity-90">Precio Exclusivo</p>
-                <p className={`text-3xl font-black text-white bg-clip-text`}>
-                  {benefits.name}
-                </p>
-              </motion.div>
+  <div className="relative z-10 text-center">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.4, duration: 0.8 }}
+    >
+      <p className="text-lg font-bold text-white/90 uppercase tracking-widest mb-auto">
+        Precio Exclusivo
+      </p>
+      
+      <p className="text-3xl md:text-3xl font-black text-white drop-shadow-lg">
+        {benefits.name}
+      </p>
 
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1 }}
-                className="text-right"
-              >
-                <p className="text-3xl font-black text-white whitespace-nowrap">
-                  S/. {(product.price * (1 - discountPercent / 100)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </p>
-              </motion.div>
+      <motion.p 
+        className="text-3xl md:text-3xl font-extrabold text-white mt-2 drop-shadow-2xl"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.8, type: "spring", stiffness: 200 }}
+      >
+        S/. {(product.price * (1 - discountPercent / 100)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      </motion.p>
+      </motion.div>
             </div>
           </div>
 

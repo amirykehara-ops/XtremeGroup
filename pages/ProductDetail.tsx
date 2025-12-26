@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useUser } from '../contexts/UserContext';
 import AuthModal from '../components/ui/AuthModal';
-import { getUserLevel } from '../constants'; // o '../constants/index' según tu estructura
+import { getUserBenefits, getSubscriptionColor } from '../constants';
 
 const ProductDetail: React.FC = () => {
   const { login } = useUser();
@@ -40,8 +40,10 @@ const ProductDetail: React.FC = () => {
 
   const product = allProducts.find(p => p.id === productId);
 
-const userLevel = user ? getUserLevel(user.points || 0) : getUserLevel(0);
-const discountPercent = userLevel.discount;
+// NUEVA LÓGICA DE SUSCRIPCIÓN
+const benefits = getUserBenefits(user?.subscription || 'regular');
+const discountPercent = benefits.discount;
+const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
 // Precio Black Friday (el de oferta que ya tienes, 1.8 es tu multiplicador original)
 const blackFridayPrice = product.price;
 
@@ -196,7 +198,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       animate={{ y: [20, 30, 20] }}
       transition={{ duration: 0.6, repeat: Infinity }}
     >
-      <Flame size={48} className="absolute right-8 top-1/2 -translate-y-1 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)] z-0" />
+      <Flame size={48} className="absolute right-4 top-1/2 -translate-y-1 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)] z-0" />
     </motion.div>
     {/* Precio tachado */}
     <div className="text-lg opacity-80 line-through mb-2">
@@ -219,7 +221,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       </motion.span>
 
       <motion.span 
-        className="absolute right-5 top-1/2 -translate-y-1/2 bg-yellow-400 text-black px-5 py-2 rounded-full text-lg font-black shadow-lg"
+        className="absolute right-5 top-1/2 -translate-y-1/2 bg-yellow-400 text-black px-2 py-1 rounded-full text-lg font-black shadow-lg"
         initial={{ scale: 0 }}
         animate={{ scale: [1, 1.3, 1] }}
         transition={{ duration: 0.6, delay: 0.8, repeat: Infinity, repeatDelay: 3 }}
@@ -262,8 +264,8 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                       <span className="text-lg font-medium text-white/90">
                         Precio Exclusivo 
                       </span>
-                      <span className={`bg-gradient-to-r ${userLevel.color} text-white px-3 py-1.5 rounded-md text-lg font-black shadow-md ml-2`}>
-                        {userLevel.name}
+                      <span className={`bg-gradient-to-r ${badgeColor} text-white px-3 py-1.5 rounded-md text-lg font-black shadow-md ml-2`}>
+                        {benefits.name}
                       </span>
                     </motion.div>
 
@@ -317,7 +319,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                     transition={{ duration: 0.6, delay: 1.6 }}
                     whileHover={{ y: -3 }}
                   >
-                    Black Friday + Descuento {userLevel.name}
+                    Black Friday + Descuento {benefits.name}
                   </motion.p>
 
                   {/* Ahorro total – Pulse fuerte + entrada */}
@@ -359,31 +361,62 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
               {/* Mensaje motivador – Siempre visible, según nivel actual */}
 
               {user && (
-              <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.2 }}
-              className="mt-8 bg-gradient-to-br from-slate-50 to-white rounded-3xl p-7 shadow-xl border-4 border-slate-100 text-center"
-            >
-              {user?.points >= 1000 ? (
-                <p className="text-2xl font-black text-accent">
-                  ¡Eres Gold 🏆 – Nivel máximo alcanzado!
-                </p>
-              ) : user?.points >= 500 ? (
-                <p className="text-xl font-bold text-dark">
-                  ¡Estás a <span className="text-accent font-black">{1000 - (user.points || 0)}</span> puntos de Gold 🏆!
-                </p>
-              ) : (
-                <p className="text-xl font-bold text-dark">
-                  ¡Estás a <span className="text-accent font-black">{500 - (user?.points || 0)}</span> puntos de Silver 🥈!
-                </p>
-              )}
-              <p className="text-muted mt-3">
-                Compra más para desbloquear descuentos exclusivos
-              </p>
-            </motion.div>
-              )}
-            <p className="text-muted mb-4 mt-8">Impuestos incluidos. Envío en 3 días hábiles.</p>
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 1.2 }}
+    className="mt-8 bg-gradient-to-br from-slate-50 to-white rounded-3xl p-7 shadow-xl border-4 border-slate-100 text-center"
+  >
+    {user.subscription === 'prime_pro' ? (
+      <p className="text-2xl font-black text-amber-600">
+        ¡Eres Prime Pro 👑 – Nivel máximo alcanzado!
+      </p>
+    ) : user.subscription === 'prime_basic' ? (
+      <p className="text-xl font-bold text-dark">
+        ¡Estás en <span className="text-blue-600 font-black">Prime Básico!</span>  
+        <br />
+        Mejora a <span className="text-amber-600 font-black">Prime Pro</span> para 20% descuento y 3x puntos 🏆
+      </p>
+    ) : (
+      <p className="text-xl font-bold text-dark" >
+        ¡Estás en <span className="text-gray-600 font-black">Regular!</span> 
+        <br />
+        Mejora a <span className="text-accent font-black">Prime Básico</span> para 10% descuento y 2x puntos 🚀
+      </p>
+    )}
+
+    <p className="text-muted mt-3">
+      {user.subscription === 'prime_pro' 
+        ? 'Disfruta de todos los beneficios exclusivos' 
+        
+        : '¡Sube de nivel y ahorra más en cada compra!'
+      }
+    </p>
+      {/* BOTÓN PARA IR A SUSCRIPCIONES – Solo si NO es Prime Pro */}
+{user.subscription !== 'prime_pro' && (
+  <motion.div 
+    className="mt-8 text-center"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 1.4 }}
+  >
+    <Link to="/suscripciones">
+    <div className="flex justify-center">
+      <Button 
+        variant="primary"
+        className="px-10 py-3 text-xl font-black rounded-2xl shadow-2xl shadow-accent/40 hover:shadow-accent/60 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+      >
+        Mejorar mi Plan
+        <ChevronRight size={24} className="ml-3 inline-block" />
+      </Button>
+      </div>
+    </Link>
+  </motion.div>
+)}
+  </motion.div>
+)}
+            <p className="text-muted mb-4 mt-8 font-black">Impuestos incluidos.<br></br>
+              Envío: {benefits.velocidadEnvio}.</p>
             <p className="text-muted mb-8 leading-relaxed">{product.desc}</p>
           </div>
           {/* Especificaciones – Diseño premium encima de cantidad */}
@@ -504,7 +537,13 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     >
       ✨
     </motion.span>
-    Puntos por tu Compra: +{product.points} pts
+    {user.subscription === 'prime_pro' ? (
+  <span>Puntos por tu Compra: +{product.points * 3} pts</span>
+) : user.subscription === 'prime_basic' ? (
+  <span>Puntos por tu Compra: +{Math.round(product.points * 2)} pts</span>
+) : (
+  <span>Puntos por tu Compra: +{product.points} pts</span>
+)}
     <motion.span 
       animate={{ rotate: [0, -10, 10, 0] }}
       transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2, delay: 0.3 }}

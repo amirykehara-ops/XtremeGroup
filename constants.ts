@@ -52,8 +52,8 @@ export const SUBSCRIPTION_BENEFITS: Record<SubscriptionType, SubscriptionBenefit
   },
   prime_basic: {
     name: 'Prime Básico',
-    discount: 20,
-    pointsMultiplier: 1.5,
+    discount: 10,
+    pointsMultiplier: 2,
     freeShippingThreshold: 300,
     badge: 'Prime Básico',
     warrantyDays: 180, // 6 meses

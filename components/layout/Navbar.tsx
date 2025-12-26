@@ -103,20 +103,20 @@ useEffect(() => {
   {user.email === 'admin' && (
         <Link 
           to="/admin" 
-          className="flex items-center gap-2 bg-dark text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-accent transition-all duration-300 shadow-lg mr-2"
+          className="flex items-center gap-2 bg-dark text-white px-2 py-1.5 rounded-xl text-xs font-bold hover:bg-accent transition-all duration-300 shadow-lg mr-2 whitespace-nowrap"
         >
           <LayoutDashboard size={16} />
           Panel Admin
         </Link>
       )}
-                  <Link to="/profile" className="flex items-center gap-3 hover:scale-105 transition-all duration-300 cursor-pointer">
-<div className={`flex items-center gap-1.5 ${badgeColor} text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md`}>
+                  <Link to="/profile" className="flex items-center gap-4  hover:scale-105 transition-all duration-300 cursor-pointer">
+<div className={`flex items-center gap-1.5 ${badgeColor} text-white px-2 py-1.5 rounded-full text-xs font-bold shadow-md whitespace-nowrap`}>
   <Star size={16} />
   <span>{benefits.badge}</span>
 </div>
 </Link>
   {/* Puntos con shimmer (mantengo tu animación épica) */}
-  <div className="relative flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-md overflow-hidden">
+  <div className="relative flex items-center gap-1.5 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-2 py-1.5 rounded-full text-xs font-bold shadow-md overflow-hidden whitespace-nowrap">
     <User size={18} />
     <motion.span
       key={user.points}

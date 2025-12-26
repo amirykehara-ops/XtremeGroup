@@ -217,20 +217,20 @@ const UserProfile: React.FC = () => {
       )}
     </motion.div>
   </div>
-<p className="text-center mt-3 text-white font-medium mb-8 mt-8">
+<p className="text-center mt-8 text-white font-medium mb-8">
   {user.subscription === 'prime_pro' ? (
     <span className="text-ghost font-bold text-2xl">¡Máximo nivel alcanzado! 🏆</span>
   ) : user.subscription === 'prime_basic' ? (
     <span className="text-lg mt-4">
-      Mejora a <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> Prime Pro</strong> 
-      <span className="mx-1">para desbloquear</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 20% descuento</strong> 
-      <span className="mx-1">y</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 3x puntos</strong>
+      Mejora a <strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> Prime Pro</strong> 
+      <span className="mx-1">para desbloquear</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 20% descuento</strong> 
+      <span className="mx-1">y</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 3x puntos</strong>
     </span>
   ) : (
     <span className="text-lg">
-      Mejora a <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> Prime Básico</strong> 
-      <span className="mx-1">para desbloquear</span> <strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 10% descuento</strong> 
-     <span className="mx-1">y</span><strong className="bg-white text-accent px-3 py-1 rounded-full font-black"> 2x puntos</strong>
+      Mejora a <strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> Prime Básico</strong> 
+      <span className="mx-1">para desbloquear</span> <strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 10% descuento</strong> 
+     <span className="mx-1">y</span><strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 2x puntos</strong>
     </span>
   )}
 </p>

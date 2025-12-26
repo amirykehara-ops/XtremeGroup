@@ -13,6 +13,8 @@ interface CartPanelProps {
 const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
   const { cart, updateQuantity, removeFromCart, clearCart, cartCount } = useCart();
   const total = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+  const totalSoles = cart.reduce((sum, item) => sum + (item.pointsCost > 0 ? 0 : item.product.price * item.quantity), 0);
+const totalPuntos = cart.reduce((sum, item) => sum + (item.pointsCost || 0) * item.quantity, 0);
   const navigate = useNavigate();  
   if (!isOpen) return null;
 
@@ -47,13 +49,28 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
           ) : (
             <div className="space-y-4">
               {cart.map(item => (
-                <div key={`${item.product.id}-${item.color || 'default'}`} className="bg-slate-50 rounded-2xl p-4">
+                  <div 
+                    key={`${item.product.id}-${item.color || 'default'}`} 
+                    className={`rounded-2xl p-4 ${item.pointsCost > 0 ? 'bg-purple-50 border border-purple-300' : 'bg-slate-50'}`}
+                  >
+                  
                   <div className="flex items-start gap-4">
                     <img src={item.product.img} alt={item.product.title} className="w-20 h-20 object-cover rounded-xl" />
                     <div className="flex-1">
                       <h3 className="font-bold text-dark">{item.product.title}</h3>
                       {item.color && <p className="text-sm text-muted">Color: {item.color}</p>}
-                      <p className="text-accent font-bold">S/ {item.product.price.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+{item.pointsCost > 0 ? (
+  <>
+    <p className="text-accent font-bold text-purple-600">S/. 0.00</p>
+    <p className="text-sm text-purple-700 font-medium mt-1">
+      Canje por {item.pointsCost * item.quantity} pts
+    </p>
+  </>
+) : (
+  <p className="text-accent font-bold">
+    S/ {item.product.price.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+  </p>
+)}
                     </div>
                     <button 
                       onClick={() => removeFromCart(item.product.id, item.color)}
@@ -79,9 +96,6 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
                         <Plus size={16} />
                       </button>
                     </div>
-                    <p className="font-bold text-accent">
-                      S/ {(item.product.price * item.quantity).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
                   </div>
                 </div>
               ))}
@@ -93,7 +107,19 @@ const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
           <div className="p-6 border-t bg-white">
             <div className="flex justify-between text-2xl font-bold mb-6">
               <span>Total</span>
-              <span>S/ {total.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+<span className={totalSoles > 0 ? 'text-accent' : 'text-purple-600'}>
+    {totalSoles > 0 && totalPuntos > 0 ? (
+      <>
+        S/ {totalSoles.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} + <span className="text-purple-600">{totalPuntos} pts</span>
+      </>
+    ) : totalSoles > 0 ? (
+      `S/ ${totalSoles.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    ) : totalPuntos > 0 ? (
+      `${totalPuntos} pts`
+    ) : (
+      'S/. 0.00'
+    )}
+  </span>
             </div>
             <Button variant="primary" className="w-full mb-3" onClick={
                 () =>{

@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Clock, Star, Flame, CheckCircle, User } from 'lucide-react';
+import { ShoppingBag, Clock, Star, Flame, CheckCircle, User, Minus, Plus, ChevronDown } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { CATALOG_PRODUCTS } from '../constants';
 import { Product } from '../types';
 import { useUser } from '../contexts/UserContext';  // ← Corrige a '../'
 import { useNavigate } from 'react-router-dom';
 import AuthModal from '../components/ui/AuthModal';
+import { useCart } from '../contexts/CartContext';  // ← Para agregar al carrito
+import Modal from '../components/ui/Modal';  // ← Si no lo tienes, para el nuevo modal
 
-const Catalog: React.FC = () => {
+const Canjes: React.FC = () => {
   const { user, login } = useUser(); // ← Obtiene el usuario logueado
+  const { addToCart } = useCart();  // ← Para agregar al carrito
   const userPoints = user?.points || 0;  // ← Puntos reales (0 si no logueado)
-  const navigate = useNavigate();  // ← Añadido
+  const navigate = useNavigate(); 
+  const [showInsufficient, setShowInsufficient] = useState(false);  // ← NUEVO
+const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
+const [selectedCanje, setSelectedCanje] = useState<Product | null>(null);  // Producto seleccionado para canje
+const [selectedQuantity, setSelectedQuantity] = useState(1);  // Cantidad (default 1)
+const [selectedColor, setSelectedColor] = useState<string | null>(null);  // Color (default null)
+const [showCanjeModal, setShowCanjeModal] = useState(false); // ← Añadido
 // Para mostrar el nombre del producto en el modal de éxito
-  const [lastCanjeado, setLastCanjeado] = useState<Product | null>(null);
   const [productoInsuficiente, setProductoInsuficiente] = useState<Product | null>(null);
 // Estado para canjeados hoy
 // Canjeados Hoy - persiste por usuario, resetea al logout
@@ -26,78 +34,23 @@ const handleCanje = (product: Product) => {
     return;
   }
 
-  if (user.points >= product.points) {
-    // 1. Restar puntos al usuario en el contexto
-    login({ ...user, points: user.points - product.points });
-    
-    // 2. Aumentar contador de canjeados hoy
-    const newCanjeados = canjeados + 1;
-    localStorage.setItem(`canjeados_hoy_${user.email}`, newCanjeados.toString());
+  const totalPointsNeeded = product.points; // Por ahora 1 unidad, el modal ajustará después
 
-    // --- NUEVO: GUARDAR EL CANJE COMO UN PEDIDO ---
-    const newExchange = {
-      id: `CANJE-${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-      customerEmail: user.email,
-      customerName: user.name,
-      userEmail: user.email,
-      date: new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' }),
-      total: 0, // Es un canje, el costo es 0 soles
-      status: 'pending', // Aparecerá en el Admin para que lo envíes
-      isExchange: true,  // <--- Etiqueta clave para diferenciarlo
-      pointsUsed: product.points,
-      items: [{
-        id: String(product.id),
-        title: `(CANJE) ${product.title}`,
-        price: 0,
-        quantity: 1,
-        img: product.img,
-        points: product.points
-      }],
-      pointsEarned: 0
-    };
-
-    // Guardar en la bolsa global (all_orders)
-    const allOrdersRaw = localStorage.getItem('all_orders');
-    const allOrders = allOrdersRaw ? JSON.parse(allOrdersRaw) : [];
-    allOrders.unshift(newExchange);
-    localStorage.setItem('all_orders', JSON.stringify(allOrders));
-    // ----------------------------------------------
-
-    setLastCanjeado(product);
-    setShowSuccess(true);
-    setShowConfetti(true);
-    
-    setTimeout(() => setShowSuccess(false), 5000);
-    setTimeout(() => setShowConfetti(false), 4000);
+  if (user.points >= totalPointsNeeded) {
+    // Tiene puntos → abre modal de cantidad/color
+    setSelectedCanje(product);
+    setSelectedQuantity(1);
+    setSelectedColor(product.colors?.[0] || null);
+    setShowCanjeModal(true);
   } else {
+    // No tiene puntos → abre modal insuficientes
     setProductoInsuficiente(product);
     setShowInsufficient(true);
   }
 };
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
-const [showInsufficient, setShowInsufficient] = useState(false);  // ← NUEVO
-const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
 
+ // Abrir/cerrar modal canje
 
-   const confetti = Array.from({ length: 150 }).map((_, i) => (  // ← Más partículas (150 para más impacto)
-    <motion.div
-        key={i}
-        className="absolute w-3 h-3 bg-gradient-to-r from-accent to-blue-500 rounded-full shadow-lg"  // ← Más grande (w-3 h-3), gradient brillante y shadow para notorio
-        style={{
-        left: `${Math.random() * 100}%`,
-        top: 0,  // ← Empieza desde arriba (top: 0)
-        }}
-        initial={{ y: 0, opacity: 1, scale: 0.5 }}  // ← Empieza pequeño en la parte superior
-        animate={showConfetti ? { 
-        y: Math.random() * 800 + 600,  // ← Cae hacia abajo (y positivo grande, hasta 1400px para cubrir pantalla)
-        opacity: 0,
-        scale: 1,
-        rotate: Math.random() * 720,  // ← Más rotación para dinamismo
-        } : { y: 0, opacity: 0, scale: 0.5 }}
-        transition={{ duration: 3 + Math.random() * 2, delay: Math.random() * 0.5 }}  // ← Dura más (3-5s)
-    />
-    ));
   return (
     <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-blue-50" />
@@ -458,71 +411,163 @@ const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
   )}
 </AnimatePresence>
 
-{/* Modal de Éxito */}
+{/* MODAL DE CANJE PREMIUM – ESTILO PRODUCT DETAIL XTREME */}
 <AnimatePresence>
-  {showSuccess && (
+  {showCanjeModal && selectedCanje && (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
-      onClick={() => setShowSuccess(false)}
+      onClick={() => setShowCanjeModal(false)}
     >
       <motion.div
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        exit={{ scale: 0, rotate: 180 }}
-        transition={{ type: "spring", stiffness: 400, damping: 20 }}
-        className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center relative overflow-hidden"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-accent/10"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3, type: "spring", stiffness: 500 }}
-          className="w-28 h-28 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"
-        >
-          <CheckCircle size={64} className="text-accent" />
-        </motion.div>
+        {/* Imagen principal */}
+        <div className="relative h-80 bg-slate-50 rounded-t-3xl overflow-hidden">
+          <img 
+            src={selectedCanje.img} 
+            alt={selectedCanje.title}
+            className="w-full h-full object-contain"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        </div>
 
-        <h2 className="text-3xl font-black text-dark mb-4">¡Canje Exitoso!</h2>
-        <p className="text-lg text-muted mb-2">Has canjeado:</p>
-        <p className="text-2xl font-bold text-accent mb-6">{lastCanjeado?.title || 'Premio Exclusivo'}</p>
-        <p className="text-lg text-muted">¡Sigue acumulando para más premios épicos!</p>
+        <div className="p-8 md:p-12">
+          {/* Título y descripción */}
+          <h2 className="text-3xl md:text-4xl font-black text-dark mb-4">
+            {selectedCanje.title}
+          </h2>
+          <p className="text-muted text-lg mb-8 leading-relaxed">
+            {selectedCanje.desc}
+          </p>
+
+          {/* Costo en puntos – Destacado */}
+          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl p-6 mb-6 text-center border border-accent/20">
+            <p className="text-xl font-medium text-dark mb-2">Costo en puntos</p>
+            <p className="text-3xl md:text-3xl font-extrabold text-accent">
+              {selectedCanje.points * selectedQuantity} pts
+            </p>
+          </div>
+
+          {/* Cantidad */}
+          <div className="mb-8">
+            <p className="text-xl font-bold text-dark mb-4">Cantidad</p>
+            <div className="flex items-center justify-center gap-2">
+              <Button 
+                variant="ghost" 
+                onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
+                className="w-auto h-auto rounded-full"
+              >
+                <Minus size={12} />
+              </Button>
+              <span className="text-2xl font-black text-dark w-20 text-center">
+                {selectedQuantity}
+              </span>
+              <Button 
+                variant="ghost" 
+                onClick={() => setSelectedQuantity(selectedQuantity + 1)}
+                className="w-auto h-auto rounded-full"  
+              >
+                <Plus size={12} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Color – 100% como en ProductDetail, adaptado para canjes */}
+{selectedCanje.colors && selectedCanje.colors.length > 0 && (
+  <div className="mb-12">
+    <label className="text-xl font-bold text-dark block mb-4">
+      Elige tu color
+    </label>
+    <div className="max-w-md mx-auto text-center">
+      <div className="relative">
+        <select
+          value={selectedColor || selectedCanje.colors[0]}
+          onChange={(e) => setSelectedColor(e.target.value)}
+          className="w-auto appearance-none bg-white border-2 border-slate-200 rounded-2xl pl-14 pr-12 py-4 text-xl font-medium text-dark text-center focus:border-accent focus:outline-none transition-all cursor-pointer hover:border-accent/50 shadow-md"
+        >
+          {selectedCanje.colors.map((color) => (
+            <option key={color} value={color}>
+              {color}
+            </option>
+          ))}
+        </select>
+
+        {/* Bolita de color dinámica – Mapeo exacto como en ProductDetail */}
+        <div className="absolute left-28 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div 
+            className="w-8 h-8 rounded-full shadow-lg border-4 border-white"
+            style={{
+              backgroundColor: 
+                selectedColor === 'Azul Eléctrico' ? '#0066FF' :
+                selectedColor === 'Rojo Fuego' ? '#FF3333' :
+                selectedColor === 'Verde Esmeralda' ? '#00C853' :
+                selectedColor === 'Morado Premium' ? '#8E24AA' :
+                selectedColor === 'Naranja Vibrante' ? '#FF6D00' :
+                selectedColor === 'Amarillo Solar' ? '#FFD600' :
+                selectedColor === 'Rosa Impacto' ? '#FF1744' :
+                selectedColor === 'Turquesa Marino' ? '#00BFA5' :
+                selectedColor === 'Gris Titanio' ? '#263238' :
+                selectedColor === 'Dorado Luxe' ? '#FFA000' :
+                '#666666' // fallback gris
+            }}
+          />
+        </div>
+
+        {/* Flecha dropdown */}
+        <div className="absolute right-28 top-1/2 -translate-y-1/2 pointer-events-none">
+          <ChevronDown size={28} className="text-slate-400" />
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+          {/* Botones finales */}
+          <div className="flex gap-6">
+            <Button 
+              variant="ghost" 
+              className="flex-1 py-5 text-xl font-black border-2 border-slate-300"
+              onClick={() => setShowCanjeModal(false)}
+            >
+              Regresar
+            </Button>
+            <Button 
+              variant="primary" 
+              className="flex-1 py-5 text-xl font-black shadow-2xl shadow-accent/40"
+              onClick={() => {
+                if (!selectedCanje || !user) return;
+
+                const totalPointsNeeded = selectedCanje.points * selectedQuantity;
+
+                if (user.points >= totalPointsNeeded) {
+                  addToCart(selectedCanje, selectedQuantity, selectedColor || undefined, selectedCanje.points * selectedQuantity);
+                  setShowCanjeModal(false);
+                  alert(
+                    `¡${selectedCanje.title} agregado al carrito!\n` +
+                    `Cantidad: ${selectedQuantity}\n` +
+                    `Costo: ${totalPointsNeeded} pts\n\n` +
+                    `Los puntos se descontarán al confirmar pago.`
+                  );
+                } else {
+                  setShowCanjeModal(false);
+                  setProductoInsuficiente(selectedCanje);
+                  setShowInsufficient(true);
+                }
+              }}
+            >
+              Canjear Ya
+            </Button>
+          </div>
+        </div>
       </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-{/* Confetti SUTIL pero VISIBLE por delante del modal */}
-<AnimatePresence>
-  {showConfetti && (
-    <motion.div
-      className="fixed inset-0 z-[100] pointer-events-none"  // z-[100] = por delante del modal (z-50)
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      {Array.from({ length: 80 }).map((_, i) => (  // ← Solo 80 partículas (no laguea)
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-gradient-to-r from-accent to-blue-500 rounded-full shadow-md"  // ← Pequeño pero brillante
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: '-10%',
-          }}
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ 
-            y: window.innerHeight + 100,
-            opacity: [0, 1, 1, 0],
-            scale: [0.5, 1.2, 0.8],
-            rotate: Math.random() * 360,
-          }}
-          transition={{ 
-            duration: 3 + Math.random() * 1.5, 
-            delay: Math.random() * 0.6,
-            ease: "easeOut"
-          }}
-        />
-      ))}
     </motion.div>
   )}
 </AnimatePresence>
@@ -531,4 +576,4 @@ const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
   );
 };
 
-export default Catalog;
+export default Canjes;

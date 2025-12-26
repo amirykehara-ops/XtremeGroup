@@ -6,11 +6,11 @@ interface CartItem {
   product: Product;
   quantity: number;
   color?: string;
+  pointsCost?: number; // ← Costo en puntos para canjes
 }
-
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number, color?: string) => void;  // ← Está bien así
+  addToCart: (product: Product, quantity?: number, color?: string, pointsCost?: number) => void;  // ← Está bien así
   removeFromCart: (productId: number, color?: string) => void;
   updateQuantity: (productId: number, color?: string, delta?: number) => void; // ← delta obligatorio al final
   clearCart: () => void;
@@ -37,21 +37,29 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product: Product, quantity=1, color?: string) => {
-    setCart(prev => {
-      const existingIndex = prev.findIndex(
-        item => item.product.id === product.id && item.color === color
-      );
+const addToCart = (product: Product, quantity = 1, color?: string, pointsCost = 0) => {
+  setCart(prev => {
+    const existingIndex = prev.findIndex(
+      item => item.product.id === product.id && item.color === color
+    );
 
-      if (existingIndex !== -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
-        return updated;
-      }
+    if (existingIndex !== -1) {
+      const updated = [...prev];
+      updated[existingIndex].quantity += quantity;
+      // Sumamos pointsCost si ya existe
+      updated[existingIndex].pointsCost = (updated[existingIndex].pointsCost || 0) + pointsCost;
+      return updated;
+    }
 
-      return [...prev, { product, quantity, color }];
-    });
-  };
+    // Nuevo item
+    return [...prev, { 
+      product, 
+      quantity, 
+      color,
+      pointsCost  // ← Guardamos el costo en puntos
+    }];
+  });
+};
 
   const removeFromCart = (productId: number, color?: string) => {
     setCart(prev => prev.filter(item => 
