@@ -41,14 +41,7 @@ const ProductDetail: React.FC = () => {
   const product = allProducts.find(p => p.id === productId);
 
 // NUEVA LÓGICA DE SUSCRIPCIÓN
-const benefits = getUserBenefits(user?.subscription || 'regular');
-const discountPercent = benefits.discount;
-const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
-// Precio Black Friday (el de oferta que ya tienes, 1.8 es tu multiplicador original)
-const blackFridayPrice = product.price;
 
-// Precio final = Black Friday - descuento nivel
-const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   // 2. Si no existe → 404
   if (!product) {
     return (
@@ -63,7 +56,14 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       </div>
     );
   }
+const benefits = getUserBenefits(user?.subscription || 'regular');
+const discountPercent = benefits.discount;
+const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
+// Precio Black Friday (el de oferta que ya tienes, 1.8 es tu multiplicador original)
+const blackFridayPrice = product.price;
 
+// Precio final = Black Friday - descuento nivel
+const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   const fromRoute = location.state?.from as 'clinica' | 'equipamiento' | undefined;
 
   const breadcrumbCategory = fromRoute === 'clinica' ? 'Clínica' : 'Equipamiento';
@@ -87,20 +87,6 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     setLightboxOpen(false);
     setLightboxImage('');
   };
-
-  if (!product) {
-    return (
-      <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen text-center">
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold text-dark mt-20"
-        >
-          Producto no encontrado
-        </motion.h2>
-      </div>
-    );
-  }
 
   const pdfUrl = `/manuales/manual-${product.id}.pdf`; // PDFs en public/manuales/
   const [zoom, setZoom] = useState(1);
@@ -191,7 +177,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   className="mb-12 flex flex-col gap-6"  // ← Jerarquía vertical, gap para espacio armonioso
 >
   {/* Black Friday – Mantiene impacto principal con animaciones */}
-  <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white px-8 py-8 rounded-3xl shadow-2xl relative overflow-hiddenw-full md:w-[485px]">
+  <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white px-8 py-8 rounded-3xl shadow-2xl relative overflow-hidden w-full md:w-[485px]">
     {/* Fuego animado – Dinámico */}
     <motion.div 
       className="absolute top-1 right-8 "
@@ -237,9 +223,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   </motion.div>
 
             {/* Descuento por nivel + Precio final – Unificado, con fondo azul fuerte y brillo */}
-            {user && discountPercent > 0 ? (
-
-              
+             
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -263,22 +247,32 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                     >
                       <span className="text-lg font-medium text-white/90">
                         Precio Exclusivo 
-                      </span>
-                      <span className={`bg-gradient-to-r ${badgeColor} text-white px-3 py-1.5 rounded-md text-lg font-black shadow-md ml-2`}>
-                        {benefits.name}
+                      {user && (
+  <span
+    className={`bg-gradient-to-r ${badgeColor} text-white px-3 py-1.5 rounded-md text-lg font-black shadow-md ml-2`}
+  >
+    {benefits.name}
+  </span>
+)}
                       </span>
                     </motion.div>
 
                     <div className="text-right">
-                      <p className="text-sm text-white/90 font-medium">Ahorras extra</p>
-                      <motion.p 
-                        className="text-2xl font-black text-white"
-                        animate={{ scale: [1, 1.08, 1] }}
-                        transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
-                      >
-                        S/. {(product.price - discountedPrice).toLocaleString('es-PE', { minimumFractionDigits: 2, 
-    maximumFractionDigits: 2})}
-                      </motion.p>
+                      <p className="text-sm text-white/90 font-medium">
+  {user && discountPercent > 0 ? 'Ahorras extra' : 'Sin ahorro extra'}
+</p>
+{user && discountPercent > 0 && (
+  <motion.p 
+    className="text-2xl font-black text-white"
+    animate={{ scale: [1, 1.08, 1] }}
+    transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
+  >
+    S/. {(product.price - discountedPrice).toLocaleString('es-PE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}
+  </motion.p>
+)}
                     </div>
                   </div>
                 </div>
@@ -302,25 +296,28 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 250, damping: 18, delay: 1.3 }}
                   >
-                    <motion.p 
-                      className="text-4xl md:text-5xl lg:text-6xl font-black text-accent tracking-tight mb-4"
-                      animate={{ scale: [1, 1.04, 1] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                     S/ {discountedPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </motion.p>
+<motion.p 
+  className="text-4xl md:text-5xl lg:text-6xl font-black text-accent tracking-tight mb-4"
+  animate={{ scale: [1, 1.04, 1] }}
+  transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+>
+  S/ {user && discountPercent > 0 
+    ? discountedPrice.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : product.price.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  }
+</motion.p>
                   </motion.div>
 
                   {/* "Black Friday + descuento" – Fade-in + hover lift */}
-                  <motion.p 
-                    className="text-xl font-bold text-dark opacity-90 mb-3"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 1.6 }}
-                    whileHover={{ y: -3 }}
-                  >
-                    Black Friday + Descuento {benefits.name}
-                  </motion.p>
+<motion.p 
+  className="text-xl font-bold text-dark opacity-90 mb-3"
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, delay: 1.6 }}
+  whileHover={{ y: -3 }}
+>
+  Black Friday {user && discountPercent > 0 ? `+ Descuento ${benefits.name}` : ''}
+</motion.p>
 
                   {/* Ahorro total – Pulse fuerte + entrada */}
                   <motion.p 
@@ -340,7 +337,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                       } 
                     }}
                   >
-                    AHORRO TOTAL: S/ {(product.price * 1.8 - discountedPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    AHORRO TOTAL: S/ {(product.price * 1.8 - (user && discountPercent > 0 ? discountedPrice : product.price)).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </motion.p>
 
                   {/* Mensaje final – Fade-in suave + hover pulse */}
@@ -351,13 +348,14 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                     transition={{ duration: 0.6, delay: 2 }}
                     whileHover={{ scale: 1.05 }}
                   >
-                    ¡Sigue acumulando puntos para más ahorros exclusivos!
+                    {user 
+  ? '¡Sigue acumulando puntos para más ahorros exclusivos!'
+  : '¡Regístrate y obtén descuentos exclusivos + puntos por compra!'
+}
                   </motion.p>
                 </div>
                 
               </motion.div>
-              
-            ) : null}
               {/* Mensaje motivador – Siempre visible, según nivel actual */}
 
               {user && (
@@ -367,11 +365,11 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     transition={{ delay: 1.2 }}
     className="mt-8 bg-gradient-to-br from-slate-50 to-white rounded-3xl p-7 shadow-xl border-4 border-slate-100 text-center"
   >
-    {user.subscription === 'prime_pro' ? (
+    {user?.subscription === 'prime_pro' ? (
       <p className="text-2xl font-black text-amber-600">
         ¡Eres Prime Pro 👑 – Nivel máximo alcanzado!
       </p>
-    ) : user.subscription === 'prime_basic' ? (
+    ) : user?.subscription === 'prime_basic' ? (
       <p className="text-xl font-bold text-dark">
         ¡Estás en <span className="text-blue-600 font-black">Prime Básico!</span>  
         <br />
@@ -386,14 +384,14 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     )}
 
     <p className="text-muted mt-3">
-      {user.subscription === 'prime_pro' 
+      {user?.subscription === 'prime_pro' 
         ? 'Disfruta de todos los beneficios exclusivos' 
         
         : '¡Sube de nivel y ahorra más en cada compra!'
       }
     </p>
       {/* BOTÓN PARA IR A SUSCRIPCIONES – Solo si NO es Prime Pro */}
-{user.subscription !== 'prime_pro' && (
+{user?.subscription !== 'prime_pro' && (
   <motion.div 
     className="mt-8 text-center"
     initial={{ opacity: 0, y: 20 }}
@@ -537,9 +535,9 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     >
       ✨
     </motion.span>
-    {user.subscription === 'prime_pro' ? (
+    {user?.subscription === 'prime_pro' ? (
   <span>Puntos por tu Compra: +{product.points * 3} pts</span>
-) : user.subscription === 'prime_basic' ? (
+) : user?.subscription === 'prime_basic' ? (
   <span>Puntos por tu Compra: +{Math.round(product.points * 2)} pts</span>
 ) : (
   <span>Puntos por tu Compra: +{product.points} pts</span>

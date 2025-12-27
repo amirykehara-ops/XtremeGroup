@@ -11,26 +11,42 @@ import { useUser } from '../contexts/UserContext';
 const PaymentSuccess = () => {
   const navigate = useNavigate();
   const { clearCart, cart } = useCart();
-  const { user, login } = useUser();
+  const { user, login, updateUser } = useUser();
 
   const [summary, setSummary] = useState({
     points: 0,
-    total: 0
+    total: 0,
+    earned: 0,
+    spent: 0
   });
   const [displayPoints, setDisplayPoints] = useState(0);
   const [animatedPoints, setAnimatedPoints] = useState(0); // El número que se mueve
+
 useEffect(() => {
-    const savedPoints = Number(localStorage.getItem('lastPurchasePoints') || '0');
-    const savedTotal = Number(localStorage.getItem('lastPurchaseTotal') || '0');
-    if (user && cart.length > 0) {
+  const rawEarned = localStorage.getItem('lastPurchasePoints');
+  const rawSpent = localStorage.getItem('lastPurchaseSpentPoints');
+  const rawTotal = localStorage.getItem('lastPurchaseTotal');
+
+  const earned = Number(rawEarned || '0');
+  const spent = Number(rawSpent || '0');
+  const total = Number(rawTotal || '0');
+
+  // EL CAMBIO: Verificar que el usuario esté cargado y existan puntos pendientes
+  if (user && (earned > 0|| spent > 0|| total > 0)) {
+    // 1. Actualizamos los puntos globalmente usando tu función de UserContext
+    const nuevoPuntajeGlobal = (user.points || 0) + earned - spent;
+    updateUser({ points: nuevoPuntajeGlobal });
+
+    // 2. Lógica de guardado de orden (lo que ya tenías) [cite: 259-261]
     const newOrder = {
-      id: Math.floor(100000 + Math.random() * 900000).toString(), // ID aleatorio de 6 dígitos
+      id: Math.floor(100000 + Math.random() * 900000).toString(),
       date: new Date().toLocaleDateString('es-PE', { 
         day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
       }),
-      total: savedTotal,
+      total: total,
       status: 'pending',
-      pointsEarned: savedPoints,
+      pointsEarned: earned,
+      pointsSpent: spent, // <-- Nuevo
       items: cart.map(item => ({
         id: item.product.id.toString(),
         title: item.product.title,
@@ -40,46 +56,30 @@ useEffect(() => {
       }))
     };
 
-    // Obtener pedidos anteriores del usuario
     const existingOrdersJSON = localStorage.getItem(`orders_${user.email}`);
     const existingOrders = existingOrdersJSON ? JSON.parse(existingOrdersJSON) : [];
-    
-    // Guardar el nuevo pedido al principio de la lista
     localStorage.setItem(`orders_${user.email}`, JSON.stringify([newOrder, ...existingOrders]));
     
-    console.log("Pedido guardado en el historial:", newOrder);}+
-  
-    setSummary({ points: savedPoints, total: savedTotal });
-    setDisplayPoints(savedPoints);
+    // 3. Actualizamos la UI local [cite: 263]
+    const diferenciaNeta = earned - spent;
+    setSummary({ 
+  points: earned - spent, 
+  total: total, 
+  earned: earned, 
+  spent: spent 
+});
+    setDisplayPoints(diferenciaNeta);
+
+    // 4. Limpieza vital para evitar duplicidad al recargar [cite: 264]
+    localStorage.removeItem('lastPurchasePoints');
+    localStorage.removeItem('lastPurchaseSpentPoints');
+    localStorage.removeItem('lastPurchaseTotal');
     clearCart();
-  }, []); // [] asegura que solo se ejecute UNA vez al cargar
+  }
+}, [user]); // IMPORTANTE: Cambiar [] por [user]// [] asegura que solo se ejecute UNA vez al cargar
 
   // 2. ACTUALIZAR USUARIO (Cuando el usuario esté disponible)
-  useEffect(() => {
     // Verificamos que el usuario exista Y que tengamos puntos para sumarle
-    if (user && summary.points > 0) {
-      const currentPoints = Number(user.points) || 0;
-      
-      const updatedUser = {
-        ...user,
-        points: currentPoints + summary.points
-      };
-
-      // 1. Actualizamos el Navbar y Contexto
-      login(updatedUser);
-
-      // 2. Borramos del almacenamiento físico
-      localStorage.removeItem('lastPurchasePoints');
-      localStorage.removeItem('lastPurchaseTotal');
-      
-      // 3. IMPORTANTE: Ponemos los puntos del estado local en 0 
-      // para que este useEffect no se vuelva a ejecutar
-      setSummary(prev => ({ ...prev, points: 0 }));
-      
-      console.log("Puntos sumados con éxito:", summary.points);
-    }
-  }, [user, summary.points]); // ← Solo se ejecuta una vez al montar
-
   useEffect(() => {
   if (displayPoints > 0) {
     let start = 0;
@@ -247,11 +247,30 @@ const downloadInvoice = () => {
       <span className="text-6xl md:text-7xl drop-shadow-lg">⭐</span>
     </motion.div>
     
-    {/* Texto de puntos - Más pequeño y elegante */}
+{/* Verificamos si hubo movimiento de puntos en el resumen */}
+{(summary.earned > 0 || summary.spent > 0) ? (
+    <div>
     <p className="text-2xl md:text-3xl font-black text-accent tabular-nums">
-      ¡Ganaste {animatedPoints} puntos Xtreme!
+      {summary.points >= 0 
+        ? `¡Balance: +${animatedPoints} puntos!` 
+        : `¡Balance: ${animatedPoints} puntos!`}
     </p>
 
+    <div className="flex gap-4 mt-2 text-sm font-medium text-muted justify-center">
+      <span className="text-green-600">+{summary.earned} ganados</span>
+      <span className="text-red-500">-{summary.spent} canjeados</span>
+    </div>
+
+    <motion.p 
+      className="text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full"
+    >
+      Tu nuevo puntaje: <span className="font-bold text-accent">{user?.points}</span>
+    </motion.p>
+    </div>
+ 
+) : (
+  <p className="text-xl text-muted mb-10">¡Gracias por tu compra!</p>
+)}
     {/* Nivel actual con Fade In al final */}
     <motion.p 
       initial={{ opacity: 0 }}
@@ -259,8 +278,8 @@ const downloadInvoice = () => {
       transition={{ delay: 1.5 }}
       className="text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full shadow-sm"
     >
-      Nivel actual: <span className="font-bold text-accent">
-        {user?.points >= 1000 ? 'Gold 🏆' : user?.points >= 500 ? 'Silver 🥈' : 'Bronze 🥉'}
+      Plan Actual: <span className="font-black text-dark">
+        {user?.subscription === 'prime_pro' ? 'Prime Pro' : user?.subscription === 'prime_basic' ? 'Prime Básico' : 'Regular'}
       </span>
     </motion.p>
   </motion.div>

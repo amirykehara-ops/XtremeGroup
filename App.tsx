@@ -20,6 +20,8 @@ import OrderHistory from './pages/OrderHistory';
 import ExchangeHistory from './pages/ExchangeHistory';  
 import PointsHistory from './pages/PointsHistory';
 import SubscriptionPlans from './pages/SubscriptionPlans';  
+import ShippingTracker from './components/ui/ShippingTracker';
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -59,6 +61,7 @@ const App: React.FC = () => {
 
               </Routes>
             </main>
+            <ShippingTracker/>
             <Footer />
            <CartIcon /> 
           </div>

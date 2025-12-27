@@ -37,7 +37,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-const addToCart = (product: Product, quantity = 1, color?: string, pointsCost = 0) => {
+const addToCart = (product: Product, quantity = 1, color?: string, unitPointsCost = 0) => {
   setCart(prev => {
     const existingIndex = prev.findIndex(
       item => item.product.id === product.id && item.color === color
@@ -47,7 +47,7 @@ const addToCart = (product: Product, quantity = 1, color?: string, pointsCost = 
       const updated = [...prev];
       updated[existingIndex].quantity += quantity;
       // Sumamos pointsCost si ya existe
-      updated[existingIndex].pointsCost = (updated[existingIndex].pointsCost || 0) + pointsCost;
+      updated[existingIndex].pointsCost! += unitPointsCost * quantity;
       return updated;
     }
 
@@ -56,7 +56,7 @@ const addToCart = (product: Product, quantity = 1, color?: string, pointsCost = 
       product, 
       quantity, 
       color,
-      pointsCost  // ← Guardamos el costo en puntos
+      pointsCost: unitPointsCost * quantity  // ← Guardamos el costo en puntos
     }];
   });
 };
@@ -67,20 +67,34 @@ const addToCart = (product: Product, quantity = 1, color?: string, pointsCost = 
     ));
   };
 
-  const updateQuantity = (productId: number, color?: string, delta: number=1) => {
-    setCart(prev => {
-      return prev.map(item => {
-        if (item.product.id === productId && item.color === color) {
-          const newQuantity = item.quantity + delta;
-          if (newQuantity <= 0) {
-            return null;  // se eliminará después
-          }
-          return { ...item, quantity: newQuantity };
+  const updateQuantity = (productId: number, color?: string, delta: number = 1) => {
+  setCart(prev => {
+    return prev.map(item => {
+      if (item.product.id === productId && item.color === color) {
+        const newQuantity = item.quantity + delta;
+        if (newQuantity <= 0) return null;
+
+        // --- CORRECCIÓN AQUÍ: Recalcular puntos ---
+        let newPointsCost = item.pointsCost;
+        
+        // Si el item tiene puntos (es un canje)
+        if (item.pointsCost && item.pointsCost > 0) {
+          // Calculamos cuánto vale 1 unidad en puntos (costo total / cantidad actual)
+          const unitPoints = item.pointsCost / item.quantity;
+          // El nuevo costo es el valor de 1 unidad por la nueva cantidad
+          newPointsCost = Math.round(unitPoints * newQuantity);
         }
-        return item;
-      }).filter(Boolean) as CartItem[];
-    });
-  };
+
+        return { 
+          ...item, 
+          quantity: newQuantity, 
+          pointsCost: newPointsCost // Actualizamos el valor
+        };
+      }
+      return item;
+    }).filter(Boolean) as CartItem[];
+  });
+};
 
   const clearCart = () => {
     setCart([]);

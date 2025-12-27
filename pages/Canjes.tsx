@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Clock, Star, Flame, CheckCircle, User, Minus, Plus, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Clock, Star, Flame, CheckCircle, User, Minus, Plus, ChevronDown, CheckCircle2 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import { CATALOG_PRODUCTS } from '../constants';
 import { Product } from '../types';
@@ -23,6 +23,9 @@ const [selectedColor, setSelectedColor] = useState<string | null>(null);  // Col
 const [showCanjeModal, setShowCanjeModal] = useState(false); // ← Añadido
 // Para mostrar el nombre del producto en el modal de éxito
   const [productoInsuficiente, setProductoInsuficiente] = useState<Product | null>(null);
+  const [cantidadInsuficiente, setCantidadInsuficiente] = useState(1);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 // Estado para canjeados hoy
 // Canjeados Hoy - persiste por usuario, resetea al logout
 const canjeados = user ? (parseInt(localStorage.getItem(`canjeados_hoy_${user.email}`) || '0')) : 0;
@@ -394,7 +397,9 @@ const handleCanje = (product: Product) => {
 </h2>
         <p className="text-lg mb-6 leading-relaxed">
           Te faltan <span className="text-4xl font-black">
-  {productoInsuficiente ? productoInsuficiente.points - (user?.points || 0) : 0} pts
+  {productoInsuficiente 
+    ? (productoInsuficiente.points * cantidadInsuficiente) - (user?.points || 0) 
+    : 0} pts
 </span> para canjear este premio.
         </p>
         <p className="text-lg mb-8 opacity-90">
@@ -534,31 +539,35 @@ const handleCanje = (product: Product) => {
           <div className="flex gap-6">
             <Button 
               variant="ghost" 
-              className="flex-1 py-5 text-xl font-black border-2 border-slate-300"
+              className="flex-1 py-1 text-xl font-black border-2 border-slate-300"
               onClick={() => setShowCanjeModal(false)}
             >
               Regresar
             </Button>
             <Button 
               variant="primary" 
-              className="flex-1 py-5 text-xl font-black shadow-2xl shadow-accent/40"
+              className="flex-1 py-1 text-xl font-black shadow-2xl shadow-accent/40"
               onClick={() => {
                 if (!selectedCanje || !user) return;
 
                 const totalPointsNeeded = selectedCanje.points * selectedQuantity;
 
                 if (user.points >= totalPointsNeeded) {
-                  addToCart(selectedCanje, selectedQuantity, selectedColor || undefined, selectedCanje.points * selectedQuantity);
+                  addToCart(selectedCanje, selectedQuantity, selectedColor || undefined, selectedCanje.points);
                   setShowCanjeModal(false);
-                  alert(
-                    `¡${selectedCanje.title} agregado al carrito!\n` +
-                    `Cantidad: ${selectedQuantity}\n` +
-                    `Costo: ${totalPointsNeeded} pts\n\n` +
-                    `Los puntos se descontarán al confirmar pago.`
-                  );
+
+                  // Prepara mensaje de éxito
+                  setSuccessMessage(`
+                    ¡${selectedCanje.title} agregado al carrito!
+                    Cantidad: ${selectedQuantity}
+                    Costo: ${totalPointsNeeded} pts
+
+                    Los puntos se descontarán al confirmar el pago.
+                  `); setShowSuccessModal(true);
                 } else {
                   setShowCanjeModal(false);
                   setProductoInsuficiente(selectedCanje);
+                  setCantidadInsuficiente(selectedQuantity);
                   setShowInsufficient(true);
                 }
               }}
@@ -577,3 +586,4 @@ const handleCanje = (product: Product) => {
 };
 
 export default Canjes;
+

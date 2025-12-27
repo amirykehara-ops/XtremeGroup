@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useCart } from '../contexts/CartContext';
 
 interface User {
   id?: string;
@@ -24,30 +25,44 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
+  const { clearCart: clearcart } = useCart();
   // 1. CARGA INICIAL: Usaremos siempre 'currentUser' para la sesión activa
   // 1. CARGA INICIAL + MIGRACIÓN AUTOMÁTICA A SUSCRIPCIONES
   useEffect(() => {
-    const saved = localStorage.getItem('currentUser');
-    if (saved) {
-      try {
-        let currentUser = JSON.parse(saved);
+  let loadedUser: User | null = null;
 
-        // === MIGRACIÓN: Si no tiene subscription, lo ponemos en Regular ===
-        if (!currentUser.subscription) {
-          currentUser.subscription = 'regular';
-          currentUser.subscriptionEndDate = null;
-          // Guardamos la versión migrada
-          localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
+  // 1. Intentamos cargar la sesión activa
+  const current = localStorage.getItem('currentUser');
+  if (current) {
+    try {
+      loadedUser = JSON.parse(current);
+    } catch (e) {
+      console.error('Error parseando currentUser', e);
+      localStorage.removeItem('currentUser');
+    }
+  }
 
-        setUser(currentUser);
-      } catch (e) {
-        console.error('Error cargando currentUser', e);
-        localStorage.removeItem('currentUser');
+  // 2. Si no hay sesión activa, recuperamos del historial global
+  if (!loadedUser) {
+    const allUsers = JSON.parse(localStorage.getItem('all_users') || '[]');
+    if (allUsers.length > 0) {
+      // Tomamos el último usuario logueado (el más reciente)
+      loadedUser = allUsers[allUsers.length - 1];
+      if (loadedUser) {
+        localStorage.setItem('currentUser', JSON.stringify(loadedUser));
       }
     }
-  }, []); 
+  }
+
+  // 3. Migración final: aseguramos subscription
+  if (loadedUser) {
+    if (!loadedUser.subscription) {
+      loadedUser.subscription = 'regular';
+      loadedUser.subscriptionEndDate = null;
+    }
+    setUser(loadedUser);
+  }
+}, []);
 
     // 2. MIGRACIÓN GLOBAL: Todos los usuarios en la base pasan a 'regular' si no tienen subscription
   useEffect(() => {
@@ -138,16 +153,46 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('users', JSON.stringify(updatedList));
   };
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem('currentUser', JSON.stringify(userData));
-    // Al loguear, también nos aseguramos que esté en la lista global
-    updateUser(userData);
-  };
+const login = (userData: User) => {
+  let finalUser = { ...userData };
+
+  // FORZAMOS la búsqueda en all_users por email para recuperar el plan
+  const allUsers = JSON.parse(localStorage.getItem('all_users') || '[]');
+  const savedUser = allUsers.find((u: any) => u.email === finalUser.email);
+
+  if (savedUser) {
+    // Usamos los datos guardados (incluyendo subscription)
+    finalUser = {
+      ...finalUser,
+      subscription: savedUser.subscription || 'regular',
+      subscriptionEndDate: savedUser.subscriptionEndDate || null,
+      points: savedUser.points || finalUser.points,
+      // Puedes añadir más campos si quieres
+    };
+  } else {
+    // Si no existe en all_users, ponemos regular
+    finalUser.subscription = finalUser.subscription || 'regular';
+    finalUser.subscriptionEndDate = finalUser.subscriptionEndDate || null;
+  }
+
+  // Guardamos todo
+  setUser(finalUser);
+  localStorage.setItem('currentUser', JSON.stringify(finalUser));
+
+  // Actualizamos all_users por si acaso
+  const existingIndex = allUsers.findIndex((u: any) => u.email === finalUser.email);
+  if (existingIndex !== -1) {
+    allUsers[existingIndex] = finalUser;
+  } else {
+    allUsers.push(finalUser);
+  }
+  localStorage.setItem('all_users', JSON.stringify(allUsers));
+};
 
   const logout = () => {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('cart');
+    clearcart();
     setUser(null);
   };
 

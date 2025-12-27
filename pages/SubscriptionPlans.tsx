@@ -7,7 +7,7 @@ import {
   Check, X, Trophy, Crown, Lock, Truck, Zap, 
   Gift, Sparkles, ChevronRight, AlertCircle, 
   ShieldCheck, Rocket, Timer, Percent, CreditCard,
-  ShoppingBag, Star, Heart, ZapOff, DollarSign, Users, BarChart3
+  ShoppingBag, Star, Heart, ZapOff, DollarSign, Users, BarChart3, User
 } from 'lucide-react';
 import AuthModal from '../components/ui/AuthModal';
 
@@ -67,7 +67,7 @@ const SubscriptionPlans: React.FC = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [authType, setAuthType] = useState<'login' | 'register'>('login'); // Nuevo estado para cambiar entre login/register
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
-  
+  const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
 
   useEffect(() => {
     // Solo mostramos el modal si el user está DEFINITIVAMENTE null
@@ -76,14 +76,14 @@ const SubscriptionPlans: React.FC = () => {
       // Pero esperamos un poquito a que localStorage cargue
       const timer = setTimeout(() => {
         if (!user) { // doble chequeo
-          setShowLoginModal(true);
+          setShowLoginRequired(true);
         }
       }, 100); // 100ms es suficiente para que UserProvider cargue
 
       return () => clearTimeout(timer);
     } else {
       // Si ya hay user, aseguramos que el modal esté cerrado
-      setShowLoginModal(false);
+      setShowLoginRequired(false);
     }
   }, [user]);
 
@@ -136,64 +136,66 @@ const SubscriptionPlans: React.FC = () => {
   ];
 
 // MODAL INICIAL: Elegir acción (Login, Registro o Invitado)
-if (showLoginModal) {
+if (showLoginRequired) {
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+<AnimatePresence>
+  {showLoginRequired && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={() => setShowLoginRequired(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.8, y: 50, rotate: -10 }}
+        animate={{ scale: 1, y: 0, rotate: 0 }}
+        exit={{ scale: 0.8, y: 50, rotate: 10 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        className="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center"
+        onClick={(e) => e.stopPropagation()}
+      >
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200"
-          onClick={(e) => e.stopPropagation()}
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
+          className="w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-6"
         >
-          {/* Header con icono */}
-          <div className="bg-gradient-to-br from-accent to-accent-dark p-8 text-center">
-            <ShieldCheck size={60} className="text-white mx-auto mb-4" />
-            <h3 className="text-3xl font-black text-white">Acceso XTREME PRIME</h3>
-            <p className="text-white/80 mt-2">Elige cómo quieres continuar</p>
-          </div>
-
-          {/* Opciones */}
-          <div className="p-8 space-y-4">
-            {/* Iniciar Sesión */}
-            <Button
-              variant="primary"
-              className="w-full py-4 text-lg font-black"
-              onClick={() => {
-                setShowLoginModal(false);
-                // Abrimos el AuthModal real en modo login
-                // Usamos dispatchEvent para activar el modal global (como haces en otros lugares)
-                window.dispatchEvent(new Event('openLoginModal'));
-              }}
-            >
-              Iniciar Sesión
-            </Button>
-
-            {/* Registrarse */}
-            <Button
-              variant="ghost"
-              className="w-full py-4 text-lg font-black border-2 border-accent hover:bg-accent hover:text-white"
-              onClick={() => {
-                setShowLoginModal(false);
-                window.dispatchEvent(new Event('openRegisterModal'));
-              }}
-            >
-              Registrarse
-            </Button>
-
-            {/* Continuar como invitado */}
-            <Button
-              variant="ghost"
-              className="w-full py-4 text-lg font-black border-2 border-accent hover:bg-accent hover:text-white"
-              onClick={() => setShowLoginModal(false)}
-            >
-              Continuar como invitado
-            </Button>
-          </div>
+          <User size={48} className="text-accent" />
         </motion.div>
-      </div>
-    </AnimatePresence>
+        <h2 className="text-3xl font-black text-dark mb-4">¡Inicia Sesión Primero!</h2>
+        <p className="text-muted mb-8 text-lg">
+          Para adquirir una membresía, necesitas inciar sesión o registrarte. 
+          <span className="text-accent font-bold"> ¡Regístrate y adquiere tu plan!</span>
+        </p>
+
+        {/* Dos botones funcionales */}
+        <div className="flex flex-col gap-4">
+          <Button 
+            variant="primary" 
+            className="w-full py-4 text-lg"
+            onClick={() => {
+              setShowLoginRequired(false);
+              window.dispatchEvent(new Event('openLoginModal'));  // ← Evento global
+            }}
+          >
+            Iniciar Sesión
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="w-full py-4 text-lg"
+            onClick={() => {
+              setShowLoginRequired(false);
+              window.dispatchEvent(new Event('openRegisterModal'));  // ← Evento global
+            }}
+          >
+            Registrarse
+          </Button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
   );
 }
   return (
@@ -256,11 +258,10 @@ if (showLoginModal) {
   variant={plan.btnVariant}
   className="w-full mt-auto py-4 text-lg font-black"
   onClick={() => {
-    if (!user) {
-      alert("Primero inicia sesión para probar los planes");
-      return;
-    }
-
+  if (!user) {
+  setShowLoginRequired(true);  // Usa el modal que ya tienes
+  return;
+}
     // Cambiamos la suscripción del usuario (solo para testing)
     const newSubscription = plan.id === 'regular' ? 'regular' : 
                            plan.id === 'basic' ? 'prime_basic' : 
@@ -275,7 +276,7 @@ if (showLoginModal) {
       subscriptionEndDate: endDate
     });
 
-    alert(`¡Ahora eres ${plan.name}! Recarga la página para ver los cambios en navbar, perfil, etc.`);
+    alert(`¡Felicidades! Ahora eres ${plan.name}. El cambio se ha guardado permanentemente.`);
   }}
 >
   {plan.btnText}

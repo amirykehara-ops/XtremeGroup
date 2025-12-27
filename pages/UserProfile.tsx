@@ -32,9 +32,9 @@ const UserProfile: React.FC = () => {
   const formattedEndDate = endDate.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
 
   // Barra de "Progreso a Máximo Ahorro" (incentivo para subir)
-  const currentSavingsPercent = user.subscription === 'regular' ? 30 : user.subscription === 'prime_basic' ? 70 : 100; // Regular 30%, Básico 70%, Pro 100%
+  const currentSavingsPercent = user?.subscription === 'regular' ? 30 : user?.subscription === 'prime_basic' ? 70 : 100; // Regular 30%, Básico 70%, Pro 100%
   const progress = currentSavingsPercent;
-  const estimatedAnnualSavings = user.subscription === 'regular' ? 600 : user.subscription === 'prime_basic' ? 2400 : 4200;
+  const estimatedAnnualSavings = user?.subscription === 'regular' ? 600 : user?.subscription === 'prime_basic' ? 2400 : 4200;
   const maxAnnualSavings = 4200; 
   const [referralCode, setReferralCode] = useState(user?.referralCode || '');
   const [copied, setCopied] = useState(false);
@@ -70,12 +70,42 @@ const UserProfile: React.FC = () => {
   };
 
   if (!user) {
-    return (
-      <div className="pt-28 pb-20 px-6 text-center">
-        <p className="text-2xl text-muted">Inicia sesión para acceder a tu perfil exclusivo</p>
-      </div>
-    );
-  }
+  return (
+    <div className="pt-28 pb-20 px-6 max-w-4xl mx-auto text-center min-h-screen flex flex-col items-center justify-center">
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white rounded-3xl shadow-2xl p-12 max-w-md w-full"
+      >
+        <div className="w-24 h-24 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-8">
+          <User size={48} className="text-accent" />
+        </div>
+        <h2 className="text-4xl font-black text-dark mb-6">
+          ¡Inicia Sesión!
+        </h2>
+        <p className="text-xl text-muted mb-10">
+          Accede a tu perfil exclusivo, puntos, historial y beneficios Prime.
+        </p>
+        <div className="flex flex-col gap-4">
+          <Button
+            variant="primary"
+            className="w-full py-4 text-lg font-bold"
+            onClick={() => window.dispatchEvent(new Event('openLoginModal'))}
+          >
+            Iniciar Sesión
+          </Button>
+          <Button
+            variant="ghost"
+            className="w-full py-4 text-lg font-bold"
+            onClick={() => window.dispatchEvent(new Event('openRegisterModal'))}
+          >
+            Crear Cuenta
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+} 
 
   return (
     <div className="pt-28 pb-20 px-6 max-w-7xl mx-auto min-h-screen">
@@ -133,19 +163,19 @@ const UserProfile: React.FC = () => {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="text-7xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
         >
-          {user.subscription === 'prime_pro' ? <Crown className="text-amber-400" size={72} /> : 
-          user.subscription === 'prime_basic' ? <Trophy className="text-accent" size={72} /> : 
+          {user?.subscription === 'prime_pro' ? <Crown className="text-amber-400" size={72} /> : 
+          user?.subscription === 'prime_basic' ? <Trophy className="text-accent" size={72} /> : 
           <Trophy className="text-slate-300" size={72} />}
         </motion.div>
 
         <div className="flex flex-col">
-          <p className={`text-6xl font-black bg-gradient-to-r ${getSubscriptionColor(user.subscription)} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
+          <p className={`text-6xl font-black bg-gradient-to-r ${getSubscriptionColor(user?.subscription)} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
             {benefits.name}
           </p>
 <p className="text-lg text-white font-bold flex items-center gap-2 mt-2">
   <span className="h-2 w-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]" />
   
-  {user.subscription === 'regular' ? (
+  {user?.subscription === 'regular' ? (
     'Sin fecha de expiración'
   ) : (
     <>
@@ -218,9 +248,9 @@ const UserProfile: React.FC = () => {
     </motion.div>
   </div>
 <p className="text-center mt-8 text-white font-medium mb-8">
-  {user.subscription === 'prime_pro' ? (
+  {user?.subscription === 'prime_pro' ? (
     <span className="text-ghost font-bold text-2xl">¡Máximo nivel alcanzado! 🏆</span>
-  ) : user.subscription === 'prime_basic' ? (
+  ) : user?.subscription === 'prime_basic' ? (
     <span className="text-lg mt-4">
       Mejora a <strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> Prime Pro</strong> 
       <span className="mx-1">para desbloquear</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 20% descuento</strong> 
@@ -235,14 +265,14 @@ const UserProfile: React.FC = () => {
   )}
 </p>
 {/* REGULAR / PRIME BASIC */}
-{(user.subscription === 'regular' || user.subscription === 'prime_basic') && (
+{(user?.subscription === 'regular' || user?.subscription === 'prime_basic') && (
   <div className="md:col-span-3 flex justify-center mt-8 mb-16">
     <Link to="/suscripciones">
       <Button
         variant="primary"
         className="px-10 py-5 text-lg font-black bg-blue text-accent hover:bg-accent hover:text-white flex items-center gap-2 shadow-xl rounded-3xl"
       >
-        {user.subscription === 'regular'
+        {user?.subscription === 'regular'
           ? 'Mejorar a Prime'
           : 'Mejorar a Prime Pro'}
         <ChevronRight size={24} />
