@@ -29,8 +29,15 @@ const UserProfile: React.FC = () => {
   const startDate = new Date(); // Simulado: fecha de compra hoy
   const endDate = new Date(startDate);
   endDate.setDate(endDate.getDate() + 365);
-  const formattedEndDate = endDate.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
-
+  const formattedEndDate = user?.subscriptionEndDate 
+  ? new Date(user.subscriptionEndDate.replace('T', ' ').replace(/-/g, '/'))
+      .toLocaleDateString('es-PE', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })
+  : 'Sin fecha de expiración';
+  //const formattedEndDate = endDate.toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
   // Barra de "Progreso a Máximo Ahorro" (incentivo para subir)
   const currentSavingsPercent = user?.subscription === 'regular' ? 30 : user?.subscription === 'prime_basic' ? 70 : 100; // Regular 30%, Básico 70%, Pro 100%
   const progress = currentSavingsPercent;

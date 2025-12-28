@@ -105,27 +105,37 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []); // [] = se ejecuta solo una vez al montar la app
 
   // 2. SINCRONIZACIÓN: Si el Admin cambia algo en 'all_users', la sesión se entera
-  useEffect(() => {
-    const syncData = () => {
-      if (!user) return;
-      // Buscamos en la base de datos global
-      const dbUsers = JSON.parse(localStorage.getItem('all_users') || localStorage.getItem('users') || '[]');
-      const myUpdatedData = dbUsers.find((u: any) => u.email === user.email);
+// DENTRO DE UserProvider en UserContext.tsx
+useEffect(() => {
+  const syncData = () => {
+    if (!user) return;
+    
+    // 1. Buscamos la data más fresca en la base global
+    const allUsers = JSON.parse(localStorage.getItem('all_users') || '[]');
+    const myUpdatedData = allUsers.find((u: any) => u.email === user.email);
 
-      if (myUpdatedData && myUpdatedData.points !== user.points) {
+    if (myUpdatedData) {
+      // 2. Comparamos si ALGO ha cambiado (puntos, plan o fecha)
+      const hasChanged = 
+        myUpdatedData.points !== user.points || 
+        myUpdatedData.subscription !== user.subscription ||
+        myUpdatedData.subscriptionEndDate !== user.subscriptionEndDate;
+
+      if (hasChanged) {
+        // 3. Si algo cambió, actualizamos la sesión de esta pestaña
         setUser(myUpdatedData);
         localStorage.setItem('currentUser', JSON.stringify(myUpdatedData));
       }
-    };
+    }
+  };
 
-    window.addEventListener('storage', syncData);
-    window.addEventListener('focus', syncData); // Al volver a la pestaña, refresca
-    return () => {
-      window.removeEventListener('storage', syncData);
-      window.removeEventListener('focus', syncData);
-    };
-  }, [user]);
-
+  window.addEventListener('storage', syncData);
+  window.addEventListener('focus', syncData); // Refresca al volver a la pestaña
+  return () => {
+    window.removeEventListener('storage', syncData);
+    window.removeEventListener('focus', syncData);
+  };
+}, [user]); // Se mantiene atento a los cambios del usuario actual
   // 3. FUNCIÓN ÚNICA DE ACTUALIZACIÓN (Para canjes y edición)
   const updateUser = (updatedUserData: Partial<User>) => {
     if (!user) return;
