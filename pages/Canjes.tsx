@@ -12,9 +12,10 @@ import Modal from '../components/ui/Modal';  // ← Si no lo tienes, para el nue
 
 const Canjes: React.FC = () => {
   const { user, login } = useUser(); // ← Obtiene el usuario logueado
-  const { addToCart } = useCart();  // ← Para agregar al carrito
+  const { addToCart, cart } = useCart();  // ← Para agregar al carrito
   const userPoints = user?.points || 0;  // ← Puntos reales (0 si no logueado)
   const navigate = useNavigate(); 
+  const [showCartRequired, setShowCartRequired] = useState(false); // Nuevo modal
   const [showInsufficient, setShowInsufficient] = useState(false);  // ← NUEVO
 const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
 const [selectedCanje, setSelectedCanje] = useState<Product | null>(null);  // Producto seleccionado para canje
@@ -26,6 +27,7 @@ const [showCanjeModal, setShowCanjeModal] = useState(false); // ← Añadido
   const [cantidadInsuficiente, setCantidadInsuficiente] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
 // Estado para canjeados hoy
 // Canjeados Hoy - persiste por usuario, resetea al logout
 const canjeados = user ? (parseInt(localStorage.getItem(`canjeados_hoy_${user.email}`) || '0')) : 0;
@@ -36,7 +38,14 @@ const handleCanje = (product: Product) => {
     setShowLoginRequired(true);
     return;
   }
+  // VALIDACIÓN: ¿Tiene al menos un producto normal en el carrito?
+  // Un producto normal es aquel que NO tiene costo en puntos (o tiene precio > 0)
+  const tieneProductoNormal = cart.some(item => !item.isCanje && item.product.price > 0);
 
+  if (!tieneProductoNormal) {
+    setShowCartRequired(true); // Mostramos el aviso de que necesita un producto normal
+    return;
+  }
   const totalPointsNeeded = product.points; // Por ahora 1 unidad, el modal ajustará después
 
   if (user.points >= totalPointsNeeded) {
@@ -416,7 +425,7 @@ const handleCanje = (product: Product) => {
   )}
 </AnimatePresence>
 
-{/* MODAL DE CANJE PREMIUM – ESTILO PRODUCT DETAIL XTREME */}
+{/* MODAL DE CANJE – DISEÑO PREMIUM, COMPACTO Y PROFESIONAL */}
 <AnimatePresence>
   {showCanjeModal && selectedCanje && (
     <motion.div
@@ -427,126 +436,120 @@ const handleCanje = (product: Product) => {
       onClick={() => setShowCanjeModal(false)}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
+        initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+        exit={{ scale: 0.95, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-accent/10"
+        className="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-accent/20"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Imagen principal */}
-        <div className="relative h-80 bg-slate-50 rounded-t-3xl overflow-hidden">
-          <img 
-            src={selectedCanje.img} 
-            alt={selectedCanje.title}
-            className="w-full h-full object-contain"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        {/* Imagen + Título */}
+        <div className="relative">
+          <div className="h-64 bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-3xl overflow-hidden">
+            <img 
+              src={selectedCanje.img} 
+              alt={selectedCanje.title}
+              className="w-full h-full object-contain"
+            />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+            <h2 className="text-2xl md:text-3xl font-black text-white drop-shadow-lg">
+              {selectedCanje.title}
+            </h2>
+          </div>
         </div>
 
-        <div className="p-8 md:p-12">
-          {/* Título y descripción */}
-          <h2 className="text-3xl md:text-4xl font-black text-dark mb-4">
-            {selectedCanje.title}
-          </h2>
-          <p className="text-muted text-lg mb-8 leading-relaxed">
+        <div className="p-8">
+          {/* Descripción */}
+          <p className="text-muted text-base leading-relaxed mb-8">
             {selectedCanje.desc}
           </p>
 
-          {/* Costo en puntos – Destacado */}
-          <div className="bg-gradient-to-br from-accent/10 to-accent/5 rounded-2xl p-6 mb-6 text-center border border-accent/20">
-            <p className="text-xl font-medium text-dark mb-2">Costo en puntos</p>
-            <p className="text-3xl md:text-3xl font-extrabold text-accent">
+          {/* Costo en puntos – DESTACADO */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-4 mb-8 text-center border-2 border-purple-200 shadow-inner mx-auto max-w-xs">
+            <p className="text-lg font-bold text-purple-700 mb-2">Costo total en puntos</p>
+            <p className="text-3xl font-black text-purple-600">
               {selectedCanje.points * selectedQuantity} pts
             </p>
           </div>
 
-          {/* Cantidad */}
+          {/* Cantidad – Más grande y premium */}
           <div className="mb-8">
-            <p className="text-xl font-bold text-dark mb-4">Cantidad</p>
+            <p className="text-xl font-bold text-dark mb-4 text-center">Cantidad</p>
             <div className="flex items-center justify-center gap-2">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="small-ghost"
                 onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
-                className="w-auto h-auto rounded-full"
+                className="w-auto h-auto rounded-full shadow-lg hover:bg-slate-100 hover:text-dark font-black"
               >
-                <Minus size={12} />
+                <Minus size={16}/>
               </Button>
-              <span className="text-2xl font-black text-dark w-20 text-center">
+              <span className="text-2xl font-black text-dark w-24 text-center">
                 {selectedQuantity}
               </span>
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="small-ghost"
                 onClick={() => setSelectedQuantity(selectedQuantity + 1)}
-                className="w-auto h-auto rounded-full"  
+                className="w-auto h-auto rounded-full shadow-lg hover:bg-slate-100 hover:text-dark font-black"
               >
-                <Plus size={12} />
+                <Plus size={16} />
               </Button>
             </div>
           </div>
 
-          {/* Color – 100% como en ProductDetail, adaptado para canjes */}
+          {/* Selector de color – Estilo Premium de Canjes */}
 {selectedCanje.colors && selectedCanje.colors.length > 0 && (
-  <div className="mb-12">
-    <label className="text-xl font-bold text-dark block mb-4">
-      Elige tu color
-    </label>
-    <div className="max-w-md mx-auto text-center">
-      <div className="relative">
-        <select
-          value={selectedColor || selectedCanje.colors[0]}
-          onChange={(e) => setSelectedColor(e.target.value)}
-          className="w-auto appearance-none bg-white border-2 border-slate-200 rounded-2xl pl-14 pr-12 py-4 text-xl font-medium text-dark text-center focus:border-accent focus:outline-none transition-all cursor-pointer hover:border-accent/50 shadow-md"
-        >
-          {selectedCanje.colors.map((color) => (
-            <option key={color} value={color}>
-              {color}
-            </option>
-          ))}
-        </select>
-
-        {/* Bolita de color dinámica – Mapeo exacto como en ProductDetail */}
-        <div className="absolute left-28 top-1/2 -translate-y-1/2 pointer-events-none">
-          <div 
-            className="w-8 h-8 rounded-full shadow-lg border-4 border-white"
-            style={{
-              backgroundColor: 
-                selectedColor === 'Azul Eléctrico' ? '#0066FF' :
-                selectedColor === 'Rojo Fuego' ? '#FF3333' :
-                selectedColor === 'Verde Esmeralda' ? '#00C853' :
-                selectedColor === 'Morado Premium' ? '#8E24AA' :
-                selectedColor === 'Naranja Vibrante' ? '#FF6D00' :
-                selectedColor === 'Amarillo Solar' ? '#FFD600' :
-                selectedColor === 'Rosa Impacto' ? '#FF1744' :
-                selectedColor === 'Turquesa Marino' ? '#00BFA5' :
-                selectedColor === 'Gris Titanio' ? '#263238' :
-                selectedColor === 'Dorado Luxe' ? '#FFA000' :
-                '#666666' // fallback gris
-            }}
-          />
-        </div>
-
-        {/* Flecha dropdown */}
-        <div className="absolute right-28 top-1/2 -translate-y-1/2 pointer-events-none">
-          <ChevronDown size={28} className="text-slate-400" />
-        </div>
+  <div className="w-full mb-8">
+    <p className="text-sm font-bold text-slate-500 mb-3 text-center uppercase tracking-widest">Elige tu color</p>
+    <div className="max-w-xs mx-auto relative">
+      <select
+        value={selectedColor || selectedCanje.colors[0]}
+        onChange={(e) => setSelectedColor(e.target.value)}
+        className="text-center w-full appearance-none bg-white border-2 border-slate-200 rounded-2xl px-6 py-4 pr-12 text-lg font-medium text-dark focus:border-accent focus:outline-none transition-all shadow-md hover:border-accent/50"
+      >
+        {selectedCanje.colors.map((color) => (
+          <option key={color} value={color}>{color}</option>
+        ))}
+      </select>
+      
+      {/* Bolita de color dinámica */}
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <div 
+          className="w-8 h-8 rounded-full shadow-lg border-4 border-white"
+          style={{
+            backgroundColor: 
+              selectedColor === 'Azul Eléctrico' ? '#0066FF' :
+              selectedColor === 'Rojo Fuego' ? '#FF3333' :
+              selectedColor === 'Verde Esmeralda' ? '#00C853' :
+              selectedColor === 'Morado Premium' ? '#8E24AA' :
+              selectedColor === 'Naranja Vibrante' ? '#FF6D00' :
+              selectedColor === 'Amarillo Solar' ? '#FFD600' :
+              selectedColor === 'Rosa Impacto' ? '#FF1744' :
+              selectedColor === 'Turquesa Marino' ? '#00BFA5' :
+              selectedColor === 'Gris Titanio' ? '#263238' :
+              selectedColor === 'Dorado Luxe' ? '#FFA000' : '#666666'
+          }}
+        />
+      </div>
+      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <ChevronDown size={24} className="text-slate-400" />
       </div>
     </div>
   </div>
 )}
 
-          {/* Botones finales */}
-          <div className="flex gap-6">
-            <Button 
-              variant="ghost" 
-              className="flex-1 py-1 text-xl font-black border-2 border-slate-300"
+          {/* Botones finales – Más grandes y equilibrados */}
+          <div className="flex gap-4">
+            <Button
+              variant="ghost"
+              className="flex-1 py-2 text-lg font-bold border-2 border-slate-300 hover:border-slate-400"
               onClick={() => setShowCanjeModal(false)}
             >
               Regresar
             </Button>
-            <Button 
-              variant="primary" 
-              className="flex-1 py-1 text-xl font-black shadow-2xl shadow-accent/40"
+            <Button
+              variant="primary"
+              className="flex-1 py-4 text-lg font-bold shadow-2xl shadow-accent/30"
               onClick={() => {
                 if (!selectedCanje || !user) return;
 
@@ -555,15 +558,14 @@ const handleCanje = (product: Product) => {
                 if (user.points >= totalPointsNeeded) {
                   addToCart(selectedCanje, selectedQuantity, selectedColor || undefined, selectedCanje.points);
                   setShowCanjeModal(false);
-
-                  // Prepara mensaje de éxito
                   setSuccessMessage(`
                     ¡${selectedCanje.title} agregado al carrito!
                     Cantidad: ${selectedQuantity}
                     Costo: ${totalPointsNeeded} pts
 
                     Los puntos se descontarán al confirmar el pago.
-                  `); setShowSuccessModal(true);
+                  `);
+                  setShowSuccessModal(true);
                 } else {
                   setShowCanjeModal(false);
                   setProductoInsuficiente(selectedCanje);
@@ -575,6 +577,57 @@ const handleCanje = (product: Product) => {
               Canjear Ya
             </Button>
           </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+{/* MODAL CARRITO REQUERIDO (PRODUCTO NORMAL) */}
+<AnimatePresence>
+  {showCartRequired && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={() => setShowCartRequired(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-white rounded-[2.5rem] shadow-2xl p-10 max-w-md w-full text-center border-4 border-accent"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="w-20 h-20 bg-accent rounded-full flex items-center justify-center mx-auto mb-6">
+          <ShoppingBag size={40} className="text-white" />
+        </div>
+        
+        <h2 className="text-2xl font-black text-dark mb-4">¡Casi listo!</h2>
+        
+        <p className="text-slate-600 mb-8 leading-relaxed">
+          Los canjes son <span className="font-bold text-accent">regalos exclusivos</span> por tu lealtad. 
+          Para procesar el envío, debes tener al menos un <span className="font-bold">producto regular</span> en tu carrito.
+        </p>
+
+        <div className="flex flex-col gap-3">
+          <Button 
+            variant="primary" 
+            className="w-full py-4 text-lg shadow-xl shadow-accent/20"
+            onClick={() => {
+              setShowCartRequired(false);
+              navigate('/equipamiento'); // Lo mandamos a comprar algo
+            }}
+          >
+            Ir a ver Productos
+          </Button>
+          <Button 
+            variant="ghost" 
+            className="w-full py-2 text-slate-500"
+            onClick={() => setShowCartRequired(false)}
+          >
+            Entendido
+          </Button>
         </div>
       </motion.div>
     </motion.div>

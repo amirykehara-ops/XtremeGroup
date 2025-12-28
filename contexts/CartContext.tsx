@@ -6,7 +6,8 @@ interface CartItem {
   product: Product;
   quantity: number;
   color?: string;
-  pointsCost?: number; // ← Costo en puntos para canjes
+  pointsCost?: number; 
+  isCanje?: boolean;// ← Costo en puntos para canjes
 }
 interface CartContextType {
   cart: CartItem[];

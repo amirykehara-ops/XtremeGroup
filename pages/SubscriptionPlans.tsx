@@ -68,6 +68,7 @@ const SubscriptionPlans: React.FC = () => {
   const [authType, setAuthType] = useState<'login' | 'register'>('login'); // Nuevo estado para cambiar entre login/register
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null);
   const [showLoginRequired, setShowLoginRequired] = useState(false);  // ← NUEVO
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Solo mostramos el modal si el user está DEFINITIVAMENTE null

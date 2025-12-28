@@ -320,7 +320,7 @@ const UserProfile: React.FC = () => {
   ))}
 
 {/* BOTONES DE HISTORIAL – 3 al lado del otro, premium y simétricos */}
-<div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10">
+<div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-10">
   {/* Historial de Pedidos */}
   <Link to="/order-history" className="block">
     <Button
@@ -338,22 +338,6 @@ const UserProfile: React.FC = () => {
     </Button>
   </Link>
 
-  {/* Historial de Canjes */}
-  <Link to="/exchange-history" className="block">
-    <Button
-      variant="primary"
-      className="w-full py-5 text-lg font-black bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-3xl shadow-2xl shadow-purple-500/30 transition-all active:scale-95 flex items-center justify-center group"
-    >
-      <motion.div
-        whileHover={{ y: -6, rotate: 5 }}
-        transition={{ type: "spring", stiffness: 300 }}
-        className="mr-4"
-      >
-        <Gift size={32} strokeWidth={3} />
-      </motion.div>
-      <span>Historial de Canjes</span>
-    </Button>
-  </Link>
 
   {/* Historial de Puntos (próximo) */}
   <Link to="/points-history" className="block">

@@ -17,7 +17,6 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import UserProfile from './pages/UserProfile';
 import DashboardAdmin from './pages/DashboardAdmin';
 import OrderHistory from './pages/OrderHistory';  
-import ExchangeHistory from './pages/ExchangeHistory';  
 import PointsHistory from './pages/PointsHistory';
 import SubscriptionPlans from './pages/SubscriptionPlans';  
 import ShippingTracker from './components/ui/ShippingTracker';
@@ -54,7 +53,6 @@ const App: React.FC = () => {
                 <Route path="/profile" element={<UserProfile />} />
                 <Route path="/admin" element={<DashboardAdmin />} />
                 <Route path="/order-history" element={<OrderHistory />} />
-                <Route path="/exchange-history" element={<ExchangeHistory />} />
                 <Route path="/points-history" element={<PointsHistory />} />
                 <Route path="/suscripciones" element={<SubscriptionPlans />} />
                 <Route path="*" element={<Home />} />
