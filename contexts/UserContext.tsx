@@ -11,6 +11,7 @@ interface User {
   referralCode?: string;
   subscription: 'regular' | 'prime_basic' | 'prime_pro';
   subscriptionEndDate: string | null;
+  pointsHistory?: any[];
 
 }
 
@@ -119,7 +120,8 @@ useEffect(() => {
       const hasChanged = 
         myUpdatedData.points !== user.points || 
         myUpdatedData.subscription !== user.subscription ||
-        myUpdatedData.subscriptionEndDate !== user.subscriptionEndDate;
+        myUpdatedData.subscriptionEndDate !== user.subscriptionEndDate ||
+        JSON.stringify(myUpdatedData.pointsHistory || []) !== JSON.stringify(user.pointsHistory); // <--
 
       if (hasChanged) {
         // 3. Si algo cambió, actualizamos la sesión de esta pestaña
@@ -177,6 +179,7 @@ const login = (userData: User) => {
       subscription: savedUser.subscription || 'regular',
       subscriptionEndDate: savedUser.subscriptionEndDate || null,
       points: savedUser.points || finalUser.points,
+      pointsHistory: savedUser.pointsHistory || [],
       // Puedes añadir más campos si quieres
     };
   } else {

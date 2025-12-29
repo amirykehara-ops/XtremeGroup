@@ -15,74 +15,92 @@ const PointsHistory: React.FC = () => {
   const [adjustments, setAdjustments] = useState<PointAdjustment[]>([]);
 
  useEffect(() => {
-  if (user) {
-    const savedUsers = localStorage.getItem('users');
+  const loadHistory = () => {
+    if (!user) {
+      setAdjustments([]);
+      return;
+    }
+
+    const savedUsers = localStorage.getItem('all_users');
     if (savedUsers) {
-      const users = JSON.parse(savedUsers);
-      const currentUser = users.find((u: any) => u.email === user.email);
-      
-      if (currentUser?.pointsHistory && currentUser.pointsHistory.length > 0) {
-        // Ordenamos del más reciente al más antiguo
-        const sorted = [...currentUser.pointsHistory].sort((a, b) => {
-          const parseDate = (dateStr: string) => {
-            if (dateStr.includes('T')) {
-              // ISO
-              return new Date(dateStr).getTime();
-            } else {
-              // Formato "dd/mm/yyyy" o con hora
-              const parts = dateStr.split(',')[0].trim().split('/');
-              if (parts.length === 3) {
-                return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+      try {
+        const users = JSON.parse(savedUsers);
+        const currentUser = users.find((u: any) => u.email === user.email);
+        
+        if (currentUser?.pointsHistory && currentUser.pointsHistory.length > 0) {
+          // Ordenamos del más reciente al más antiguo
+          const sorted = [...currentUser.pointsHistory].sort((a, b) => {
+            const parseDate = (dateStr: string) => {
+              if (dateStr.includes('T')) {
+                return new Date(dateStr).getTime();
+              } else {
+                const parts = dateStr.split(',')[0].trim().split('/');
+                if (parts.length === 3) {
+                  return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`).getTime();
+                }
+                return 0;
               }
-              return 0;
-            }
-          };
+            };
+            return parseDate(b.date) - parseDate(a.date);
+          });
 
-          return parseDate(b.date) - parseDate(a.date); // Más reciente primero
-        });
-
-        const formatted = sorted.map(adj => {
-          let displayDate = 'Fecha inválida';
-          
-          if (adj.date.includes('T')) {
-            // ISO
-            displayDate = new Date(adj.date).toLocaleDateString('es-PE', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            });
-          } else {
-            // Formato antiguo
-            const parts = adj.date.split(',')[0].trim().split('/');
-            if (parts.length === 3) {
-              const dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-              displayDate = dateObj.toLocaleDateString('es-PE', {
+          const formatted = sorted.map(adj => {
+            let displayDate = 'Fecha inválida';
+            
+            if (adj.date.includes('T')) {
+              displayDate = new Date(adj.date).toLocaleDateString('es-PE', {
                 day: '2-digit',
                 month: 'long',
-                year: 'numeric'
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
               });
-              if (adj.date.includes(',')) {
-                displayDate += ', ' + adj.date.split(',')[1].trim();
+            } else {
+              const parts = adj.date.split(',')[0].trim().split('/');
+              if (parts.length === 3) {
+                const dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                displayDate = dateObj.toLocaleDateString('es-PE', {
+                  day: '2-digit',
+                  month: 'long',
+                  year: 'numeric'
+                });
+                if (adj.date.includes(',')) {
+                  displayDate += ', ' + adj.date.split(',')[1].trim();
+                }
               }
             }
-          }
 
-          return {
-            ...adj,
-            displayDate
-          };
-        });
+            return { ...adj, displayDate };
+          });
 
-        setAdjustments(formatted);
-      } else {
+          setAdjustments(formatted);
+        } else {
+          setAdjustments([]);
+        }
+      } catch (e) {
+        console.error('Error leyendo historial', e);
         setAdjustments([]);
       }
     }
-  }
-}, [user]);
+  };
 
+  // Cargar al inicio
+  loadHistory();
+
+  // Escuchar cambios en localStorage (cuando el admin ajusta)
+  const handleStorageChange = (e: StorageEvent) => {
+    if (e.key === 'all_users') {
+      loadHistory();
+    }
+  };
+
+  window.addEventListener('storage', handleStorageChange);
+
+  // Limpiar listener
+  return () => {
+    window.removeEventListener('storage', handleStorageChange);
+  };
+}, [user]);
   if (!user) {
     return (
       <div className="pt-28 pb-20 px-6 text-center">

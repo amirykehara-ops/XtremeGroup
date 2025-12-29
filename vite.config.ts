@@ -10,7 +10,7 @@ server: {
       port: 5173,
       host: '0.0.0.0',
       allowedHosts: [
-        "overrepresentative-intermembral-evita.ngrok-free.dev"
+        "zaiden-matted-nonbotanically.ngrok-free.dev"
       ]
     },
     plugins: [
@@ -35,9 +35,9 @@ server: {
                       email: `test_user_${Math.floor(Math.random() * 100000)}@testuser.com` 
                     },
                     back_urls: {
-                      success: "https://overrepresentative-intermembral-evita.ngrok-free.dev/#/payment-success",
-                      failure: "https://overrepresentative-intermembral-evita.ngrok-free.dev/#/payment-failed",
-                      pending: "https://overrepresentative-intermembral-evita.ngrok-free.dev/#/payment-failed"
+                      success: "https://zaiden-matted-nonbotanically.ngrok-free.dev/#/payment-success",
+                      failure: "https://zaiden-matted-nonbotanically.ngrok-free.dev/#/payment-failed",
+                      pending: "https://zaiden-matted-nonbotanically.ngrok-free.dev/#/payment-failed"
                     },
                     //back_url: {
                     //  success: "https://www.google.com"

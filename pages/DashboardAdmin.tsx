@@ -694,31 +694,48 @@ const expiry = new Date(dateStr);
             <Button 
               variant="primary"
               className="flex-1 py-4 text-lg font-black shadow-xl"
-              onClick={() => {
-                // EJECUTAR EL AJUSTE
-                updateUserPoints(u.email, u.points + tempAdjustment.change);
+onClick={() => {
+  const change = tempAdjustment.change;
+  const reason = tempAdjustment.reason;
 
-                const newHistory = {
-                  date: new Date().toISOString(), // Ej: "2025-12-24T10:30:45.123Z"
-                  pointsChange: tempAdjustment.change,
-                  reason: tempAdjustment.reason
-                };
+  // Creamos el nuevo registro de historial
+  const newHistory = {
+    date: new Date().toISOString(),
+    pointsChange: change,
+    reason: reason
+  };
 
-                setUsers(prev => prev.map(user => 
-                  user.email === u.email 
-                    ? { ...user, pointsHistory: [...(user.pointsHistory || []), newHistory] }
-                    : user
-                ));
+  // Calculamos el nuevo nivel
+  const newPoints = u.points + change;
+  const newLevel = newPoints >= 1000 ? 'Gold' : newPoints >= 500 ? 'Silver' : 'Bronze';
 
-                // Limpiar inputs
-                const pointsInput = document.getElementById(`points-adjust-${u.email}`) as HTMLInputElement;
-                const reasonInput = document.getElementById(`points-reason-${u.email}`) as HTMLInputElement;
-                pointsInput.value = '';
-                reasonInput.value = '';
+  // UN SOLO setUsers que actualiza TODO: puntos, level y historial
+  setUsers(prev => prev.map(user => 
+    user.email === u.email 
+      ? { 
+          ...user, 
+          points: newPoints,
+          level: newLevel,
+          pointsHistory: [...(user.pointsHistory || []), newHistory]
+        }
+      : user
+  ));
 
-                setShowConfirmModal(false);
-                setShowSuccessModal(true);
-              }}
+  // Actualizamos el contexto del usuario (para sincronización y tiempo real)
+  updateUser({
+    points: newPoints,
+    pointsHistory: [...(u.pointsHistory || []), newHistory]
+  });
+
+  // Limpiar inputs
+  const pointsInput = document.getElementById(`points-adjust-${u.email}`) as HTMLInputElement;
+  const reasonInput = document.getElementById(`points-reason-${u.email}`) as HTMLInputElement;
+  if (pointsInput) pointsInput.value = '';
+  if (reasonInput) reasonInput.value = '';
+
+  setShowConfirmModal(false);
+  setShowSuccessModal(true);
+}}
             >
               Confirmar Ajuste
             </Button>
