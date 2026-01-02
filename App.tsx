@@ -20,6 +20,7 @@ import OrderHistory from './pages/OrderHistory';
 import PointsHistory from './pages/PointsHistory';
 import SubscriptionPlans from './pages/SubscriptionPlans';  
 import ShippingTracker from './components/ui/ShippingTracker';
+import CanjeEspecial from './pages/CanjeEspecial';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -55,6 +56,8 @@ const App: React.FC = () => {
                 <Route path="/order-history" element={<OrderHistory />} />
                 <Route path="/points-history" element={<PointsHistory />} />
                 <Route path="/suscripciones" element={<SubscriptionPlans />} />
+                <Route path="/canje-especial" element={<CanjeEspecial />} />
+
                 <Route path="*" element={<Home />} />
 
               </Routes>

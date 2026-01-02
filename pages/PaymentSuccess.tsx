@@ -48,7 +48,7 @@ useEffect(() => {
 
     // 2. Lógica de guardado de orden (lo que ya tenías) [cite: 259-261]
     const newOrder = {
-      id: Math.floor(100000 + Math.random() * 900000).toString(),
+      id: localStorage.getItem('lastPurchaseOrderId') || Math.floor(100000 + Math.random() * 900000).toString(),
       date: new Date().toLocaleDateString('es-PE', { 
         day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' 
       }),
@@ -67,6 +67,10 @@ useEffect(() => {
 
     const existingOrdersJSON = localStorage.getItem(`orders_${user.email}`);
     const existingOrders = existingOrdersJSON ? JSON.parse(existingOrdersJSON) : [];
+    localStorage.setItem('lastPurchaseOrderId', newOrder.id);
+    localStorage.setItem('last_purchase_time', new Date().getTime().toString());
+    localStorage.setItem('last_purchase_user', user.email);
+    window.dispatchEvent(new Event('storage')); // Avisa al Navbar al instante
     localStorage.setItem(`orders_${user.email}`, JSON.stringify([newOrder, ...existingOrders]));
     
     // 3. Actualizamos la UI local [cite: 263]

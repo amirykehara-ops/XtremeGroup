@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink as Link, useLocation } from 'react-router-dom';
-import { Menu, X, ShoppingBag, User, LogOut, LayoutDashboard, Star } from 'lucide-react';
+import { Menu, X, ShoppingBag, User, LogOut, LayoutDashboard, Star, Flame, AlertCircle, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUser } from '../../contexts/UserContext';
 import { useCart } from '../../contexts/CartContext';
@@ -17,8 +17,10 @@ const Navbar: React.FC = () => {
   const [showRegister, setShowRegister] = useState(false);
   const location = useLocation();
   const { user, logout, login} = useUser();
+  const [hasActiveOffer, setHasActiveOffer] = useState(false);
   const { cartCount } = useCart();
   const badgeColor = getSubscriptionColor(user?.subscription);
+  const [timeLeft, setTimeLeft] = useState("");
   // Función para obtener nivel, icono y color según puntos
 
 const benefits = getUserBenefits(user?.subscription);
@@ -36,6 +38,30 @@ useEffect(() => {
   window.addEventListener('scroll', handleScroll);
   return () => window.removeEventListener('scroll', handleScroll);
 }, []);
+useEffect(() => {
+  if (!hasActiveOffer) return;
+
+  const updateTimer = () => {
+    const lastPurchase = localStorage.getItem('last_purchase_time');
+    if (lastPurchase) {
+      const expiry = parseInt(lastPurchase) + (12 * 60 * 60 * 1000);
+      const now = new Date().getTime();
+      const diff = expiry - now;
+
+      if (diff <= 0) {
+        setHasActiveOffer(false);
+      } else {
+        const h = Math.floor(diff / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        setTimeLeft(`${h}h ${m}m`);
+      }
+    }
+  };
+
+  updateTimer();
+  const timer = setInterval(updateTimer, 60000); // Actualiza cada minuto
+  return () => clearInterval(timer);
+}, [hasActiveOffer]);
 
   useEffect(() => {
   const openLogin = () => setShowLogin(true);
@@ -49,7 +75,23 @@ useEffect(() => {
     window.removeEventListener('openRegisterModal', openRegister);
   };
 }, []);
+useEffect(() => {
+  const checkOffer = () => {
+    const lastPurchase = localStorage.getItem('last_purchase_time');
+    const lastUser = localStorage.getItem('last_purchase_user');
+    if (lastPurchase && user && lastUser === user.email) {
+      const expiry = parseInt(lastPurchase) + (12 * 60 * 60 * 1000);
+      const now = new Date().getTime();
+      setHasActiveOffer(now < expiry);
+    } else {
+      setHasActiveOffer(false);
+    }
+  };
 
+  checkOffer();
+  const interval = setInterval(checkOffer, 10000); // Revisa cada 10 seg
+  return () => clearInterval(interval);
+}, [location.pathname]);
   return (
     <>
       <motion.header 
@@ -100,6 +142,44 @@ useEffect(() => {
               {user ? (
                 <>
 <div className="flex items-center gap-3">
+                {/* ICONO DE LLAMA PREMIUM */}
+{/* ICONO DE ALERTA DE CANJE CON TOOLTIP */}
+{hasActiveOffer && (
+  <div className="relative group px-2">
+    <Link to="/canje-especial">
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.15, 1],
+        }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        className="bg-red-100 text-red-600 p-2 rounded-xl cursor-pointer flex items-center justify-center shadow-sm border border-red-200 hover:bg-red-600 hover:text-white transition-colors duration-300"
+      >
+        <AlertCircle size={20} className="animate-pulse" />
+      </motion.div>
+    </Link>
+
+    {/* TOOLTIP PROFESIONAL */}
+    <div className="absolute top-full mt-3 right-0 w-64 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 z-[100]">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 relative">
+        {/* Triangulito del tooltip */}
+        <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white border-t border-l border-slate-100 rotate-45"></div>
+        
+        <div className="flex items-start gap-3">
+          <div className="bg-red-500 p-2 rounded-lg text-white">
+            <Clock size={16} />
+          </div>
+          <div>
+            <p className="text-xs font-black text-dark uppercase tracking-wider">¡Acceso Especial!</p>
+            <p className="text-[11px] text-muted leading-relaxed mt-1">
+              Tienes <span className="font-bold text-red-600">{timeLeft}</span> para añadir canjes a tu envío <span className="font-bold underline">GRATIS</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
   {user.email === 'admin' && (
         <Link 
           to="/admin" 
@@ -175,6 +255,26 @@ useEffect(() => {
             exit={{ opacity: 0, height: 0 }}
             className="fixed inset-0 bg-white z-40 pt-24 px-6 md:hidden overflow-hidden"
           >
+{/* Mobile Menu - Dentro de AnimatePresence */}
+{hasActiveOffer && (
+  <motion.div 
+    initial={{ x: -20, opacity: 0 }} 
+    animate={{ x: 0, opacity: 1 }}
+    className="mb-6"
+  >
+    <Link 
+      to="/canje-especial" 
+      className="flex flex-col gap-1 p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 shadow-sm"
+      onClick={() => setMobileOpen(false)}
+    >
+      <div className="flex items-center gap-2 font-black text-sm">
+        <AlertCircle size={18} />
+        ¡ENVÍO DE CANJES DISPONIBLE!
+      </div>
+      <p className="text-xs opacity-80">Te quedan {timeLeft} para aprovechar tu pedido actual.</p>
+    </Link>
+  </motion.div>
+)}
             <div className="flex flex-col gap-6">
               {user?.email === 'admin' && (
     <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
@@ -188,6 +288,8 @@ useEffect(() => {
       </Link>
     </motion.div>
   )}
+
+  
 {NAV_LINKS.map((link, i) => (
   <motion.div
     key={link.path}

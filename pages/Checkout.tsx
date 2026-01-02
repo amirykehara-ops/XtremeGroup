@@ -181,6 +181,9 @@ const totalAmount = subtotal + shippingCost;
 const existingOrders = existingOrdersJSON ? JSON.parse(existingOrdersJSON) : [];
 localStorage.setItem(`orders_${user.email}`, JSON.stringify([newOrder, ...existingOrders]));
   localStorage.setItem('lastPurchaseOrderId', newOrder.id);
+  
+  localStorage.setItem('last_purchase_time', new Date().getTime().toString());
+  localStorage.setItem('last_purchase_user', user.email);
   localStorage.setItem('all_orders', JSON.stringify(allOrders));
     // 2. Guardamos datos temporales para la pantalla de Success
   localStorage.setItem('lastPurchasePoints', puntosGanados.toString());
