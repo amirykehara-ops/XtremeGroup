@@ -253,7 +253,7 @@ useEffect(() => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: '100vh' }}
             exit={{ opacity: 0, height: 0 }}
-            className="fixed inset-0 bg-white z-40 pt-24 px-6 md:hidden overflow-hidden"
+            className="fixed inset-0 bg-white z-40 pt-24 px-6 md:hidden overflow-y-auto"
           >
 {/* Mobile Menu - Dentro de AnimatePresence */}
 {hasActiveOffer && (
@@ -275,20 +275,8 @@ useEffect(() => {
     </Link>
   </motion.div>
 )}
-            <div className="flex flex-col gap-6">
-              {user?.email === 'admin' && (
-    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
-      <Link 
-        to="/admin" 
-        className="text-3xl font-bold text-accent flex items-center gap-3"
-        onClick={() => setMobileOpen(false)}
-      >
-        <LayoutDashboard size={32} />
-        Administración
-      </Link>
-    </motion.div>
-  )}
-
+            <div className="flex flex-col gap-4">
+             
   
 {NAV_LINKS.map((link, i) => (
   <motion.div
@@ -299,18 +287,10 @@ useEffect(() => {
   >
     <Link 
       to={link.path} 
-      className={`text-3xl font-bold flex items-center gap-3 ${location.pathname === link.path ? 'text-accent' : 'text-dark'}`}
+      className={`text-2xl mb-1 font-bold flex items-center gap-2 ${location.pathname === link.path ? 'text-accent' : 'text-dark'}`}
       onClick={() => setMobileOpen(false)}
     >
       {link.label}
-      {link.label === 'Suscripciones' && (
-        <motion.span
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <Star size={32} className="text-yellow-500" fill="currentColor" />
-        </motion.span>
-      )}
     </Link>
   </motion.div>
 ))}
@@ -318,33 +298,61 @@ useEffect(() => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="mt-8 flex flex-col gap-4"
+                className="mt-8 flex flex-col gap-2"
               >
+                 {user?.email === 'admin' && (
+    <motion.div initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
+{/* Contenedor para el botón de Administración (Arriba y al Centro) */}
+<div className="flex justify-center w-full mb-2">
+  <Link 
+    to="/admin" 
+    className="inline-flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md hover:bg-slate-800 transition-colors"
+    onClick={() => setMobileOpen(false)}
+  >
+    <LayoutDashboard size={24} />
+    <span>Administración</span>
+  </Link>
+</div>
+
+    </motion.div>
+  )}
+
                 {user ? (
   <>
-<div className="text-center">
-  <Link to="/profile" className="block text-center mb-6">
-  {/* Nivel grande */}
-<div className={`inline-flex items-center gap-3 ${badgeColor} text-white px-6 py-3 rounded-2xl font-bold shadow-lg text-xl`}>
-  <Star size={32} />
-  <span>{benefits.badge}</span>
-</div>
+<div className="grid grid-cols-2 gap-4 w-full max-w-md mx-auto items-center mb-3">
   
-  {/* Puntos debajo */}
-  <div className="mt-4 text-3xl font-black text-accent bg-white/90 backdrop-blur-sm px-8 py-4 rounded-2xl shadow-xl">
-    {user.points} pts
-  </div>
+  {/* Columna Izquierda (Link): Alineamos el contenido al final (derecha de su celda) */}
+  <Link to="/profile" className="flex justify-end items-center">
+    <div className={`inline-flex items-center gap-2 ${badgeColor} text-white px-3 py-2 rounded-2xl font-bold shadow-lg text-sm`}>
+      <Star size={24} />
+      <span>{benefits.badge}</span>
+    </div>
   </Link>
 
+  {/* Columna Derecha (Puntos): Alineamos el contenido al inicio (izquierda de su celda) */}
+  <div className="flex justify-start items-center">
+    <div className="inline-flex items-center gap-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-3 py-2 rounded-2xl text-sm font-bold shadow-lg">
+      <User size={24} />
+      <motion.span
+        key={user.points}
+        initial={{ y: 20, opacity: 0, scale: 1.5 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 15 }}
+      >
+        {user.points} pts
+      </motion.span>
+    </div>
+  </div>
+
 </div>
 
-    <Button variant="ghost" onClick={logout} className="w-full">
+    <Button variant="ghost" onClick={logout} className="w-full flex items-center justify-center gap-2">
       Cerrar Sesión
     </Button>
   </>
 ) : (
   <>
-    <Button variant="ghost" onClick={() => { setShowLogin(true); setMobileOpen(false); }} className="w-full">
+    <Button variant="ghost" onClick={() => { setShowLogin(true); setMobileOpen(false); }} className="w-full flex items-center justify-center gap-2 mb-3">
       Iniciar Sesión
     </Button>
     <Button variant="primary" onClick={() => { setShowRegister(true); setMobileOpen(false); }} className="w-full">

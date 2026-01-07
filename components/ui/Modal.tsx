@@ -111,16 +111,16 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.8 }}
     >
-      <p className="text-lg font-bold text-white/90 uppercase tracking-widest mb-auto">
+      <p className="text-sm sm:text-lg font-bold text-white/90 uppercase tracking-widest mb-auto">
         Precio Exclusivo
       </p>
       
-      <p className="text-3xl md:text-3xl font-black text-white drop-shadow-lg">
+      <p className="text-xl sm:text-3xl md:text-3xl font-black text-white drop-shadow-lg">
         {benefits.name}
       </p>
 
       <motion.p 
-        className="text-3xl md:text-3xl font-extrabold text-white mt-2 drop-shadow-2xl"
+        className="text-2xl sm:text-3xl md:text-3xl font-extrabold text-white mt-2 drop-shadow-2xl"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.8, type: "spring", stiffness: 200 }}

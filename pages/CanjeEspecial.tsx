@@ -143,7 +143,7 @@ const handleCanjeFinal = (product: any) => {
               <h1 className="text-4xl md:text-6xl font-black text-dark tracking-tighter mb-4">
                 ¡Beneficio <span className="text-accent">Exclusivo!</span>
               </h1>
-              <p className="text-xl text-muted max-w-xl">
+              <p className="text-lg sm:text-xl text-muted max-w-xl">
                 Por tu compra reciente, tienes 12 horas para añadir canjes a tu pedido <span className="font-bold text-dark italic">¡SIN COSTO DE ENVÍO ADICIONAL!</span>
               </p>
             </div>
@@ -155,7 +155,7 @@ const handleCanjeFinal = (product: any) => {
                 </motion.div>
               </div>
               <p className="text-slate-400 text-xs uppercase font-black tracking-widest mb-1">Tu oferta expira en:</p>
-              <p className="text-4xl font-mono font-black text-white">{timeLeft}</p>
+              <p className="text-2xl sm:text-4xl font-mono font-black text-white">{timeLeft}</p>
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@ const handleCanjeFinal = (product: any) => {
             <Button variant="ghost" className="flex-1" onClick={() => setShowModal(false)}>Cancelar</Button>
             <Button 
               variant="primary" 
-              className="flex-1 font-black"
+              className="flex-1 font-black text-sm sm:text-base"
               onClick={() => {
                 handleCanjeFinal(selectedCanje); // <--- AQUÍ SE EJECUTA LA LÓGICA
                 setShowModal(false);

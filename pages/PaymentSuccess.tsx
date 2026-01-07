@@ -269,16 +269,17 @@ const handleCanjeDirecto = (product, quantity, color) => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 500 }}
-          className="w-32 h-32 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-8"
+          className="w-24 sm:w-32 h-24 sm:h-32 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-8"
         >
-          <CheckCircle size={80} className="text-accent" />
+          <CheckCircle size={80} className="hidden sm:block text-accent" />
+          <CheckCircle size={50} className="sm:hidden text-accent" />
         </motion.div>
 
-        <h1 className="text-5xl md:text-6xl font-black text-dark mb-6">
+        <h1 className="text-3xl md:text-6xl sm:text-6xl font-black text-dark mb-6">
           ¡Pago Exitoso!
         </h1>
 
-        <p className="text-xl text-muted mb-6">
+        <p className="text-lg sm:text-xl text-muted mb-6">
           Tu compra de <span className="font-bold text-accent">S/ {summary.total.toFixed(2)}</span> ha sido procesada correctamente.
         </p>
 
@@ -304,13 +305,13 @@ const handleCanjeDirecto = (product, quantity, color) => {
         ease: "easeInOut"
       }}
     >
-      <span className="text-6xl md:text-7xl drop-shadow-lg">⭐</span>
+      <span className="text-4xl md:text-7xl sm:text-7xl drop-shadow-lg">⭐</span>
     </motion.div>
     
 {/* Verificamos si hubo movimiento de puntos en el resumen */}
 {(summary.earned > 0 || summary.spent > 0) ? (
     <div>
-    <p className="text-2xl md:text-3xl font-black text-accent tabular-nums">
+    <p className="text-lg md:text-3xl sm:text-3xl font-black text-accent tabular-nums">
       {summary.points >= 0 
         ? `¡Balance: +${animatedPoints} puntos!` 
         : `¡Balance: ${animatedPoints} puntos!`}
@@ -322,7 +323,7 @@ const handleCanjeDirecto = (product, quantity, color) => {
     </div>
 
     <motion.p 
-      className="text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full"
+      className="text-base sm:text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full"
     >
       Tu nuevo puntaje: <span className="font-bold text-accent">{user?.points}</span>
     </motion.p>
@@ -336,7 +337,7 @@ const handleCanjeDirecto = (product, quantity, color) => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: 1.5 }}
-      className="text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full shadow-sm"
+      className="text-base sm:text-lg text-muted mt-4 bg-slate-50 border border-slate-100 px-6 py-2 rounded-full shadow-sm"
     >
       Plan Actual: <span className="font-black text-dark">
         {user?.subscription === 'prime_pro' ? 'Prime Pro' : user?.subscription === 'prime_basic' ? 'Prime Básico' : 'Regular'}
@@ -349,8 +350,8 @@ const handleCanjeDirecto = (product, quantity, color) => {
   </p>
 )}
 {/* SECCIÓN DE CANJE POST-VENTA */}
-<div className="mt-10 mb-12 p-6 bg-gradient-to-br from-accent/5 to-blue-50 rounded-3xl border border-accent/20">
-  <h3 className="text-2xl font-black text-dark mb-2 flex items-center justify-center gap-2">
+<div className="mt-10 mb-12 p-4 sm:p-6 bg-gradient-to-br from-accent/5 to-blue-50 rounded-3xl border border-accent/20">
+  <h3 className="text-xl sm:text-2xl font-black text-dark mb-2 flex items-center justify-center gap-2">
     <Flame className="text-orange-500" fill="currentColor" /> 
     ¡Aprovecha tus puntos ahora!
   </h3>
@@ -384,7 +385,7 @@ const handleCanjeDirecto = (product, quantity, color) => {
     ))}
   </div>
 </div>
-        <p className="text-lg text-muted mb-12">
+        <p className="text-base sm:text-lg text-muted mb-12">
           En breve recibirás la confirmación por email. ¡Sigue acumulando puntos para ofertas exclusivas!
         </p>
         
@@ -422,14 +423,14 @@ const handleCanjeDirecto = (product, quantity, color) => {
   <div className="flex flex-col sm:flex-row gap-4 justify-center">
     <Button 
       variant="primary" 
-      className="px-10 py-5 text-lg shadow-2xl hover:shadow-accent/30 transition-shadow flex-1"
+      className="px-10 py-4 sm:py-5 text-lg shadow-2xl hover:shadow-accent/30 transition-shadow flex-1"
       onClick={() => navigate('/equipamiento')}
     >
       Seguir Comprando
     </Button>
     <Button 
       variant="ghost" 
-      className="px-10 py-5 text-lg flex-1"
+      className="px-10 py-4 sm:py-5 text-lg flex-1"
       onClick={() => navigate('/')}
     >
       Ir al Inicio

@@ -151,26 +151,26 @@ const downloadOrderPDF = (order: Order) => {
 };
 
   return (
-    <div className="pt-28 pb-20 px-6 max-w-7xl mx-auto min-h-screen">
+    <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen">
       <motion.div 
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-16"
       >
-        <h1 className="text-5xl md:text-6xl font-black text-dark mb-4">
+        <h1 className="text-3xl md:text-6xl sm:text-6xl font-black text-dark mb-4">
           Historial de Compras
         </h1>
-        <p className="text-xl text-muted max-w-xl mx-auto">Revisa tus compras, puntos ganados y vuelve a comprar fácilmente</p>
+        <p className="text-lg sm:text-xl text-muted max-w-xl mx-auto">Revisa tus compras, puntos ganados y vuelve a comprar fácilmente</p>
       </motion.div>
 
       {/* Filtros */}
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
+      <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mb-10 lg:mb-12">
         {(['all', 'pending', 'shipped', 'delivered'] as const).map((f) => (
           <Button
             key={f}
             variant={filter === f ? 'primary' : 'ghost'}
             onClick={() => setFilter(f)}
-            className="px-6 py-3 rounded-full"
+            className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-full text-sm sm:text-base"
           >
             {f === 'all' ? 'Todos' : getStatusText(f)}
           </Button>
@@ -191,26 +191,26 @@ const downloadOrderPDF = (order: Order) => {
               >
                 {/* Header del pedido */}
                 <div 
-                  className="p-8 cursor-pointer hover:bg-slate-50/50 transition-colors flex items-center justify-between gap-6"
+                  className="p-6 sm:p-8 cursor-pointer hover:bg-slate-50/50 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6"
                   onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                 >
-                  <div className="flex items-center gap-6">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
                     <div className={`p-4 rounded-2xl shadow-inner ${order.isExchange ? 'bg-purple-100' : 'bg-slate-50'}`}>
                       {getStatusIcon(order.status)} {/* ← Antes decía order.status, ahora solo order */}
                     </div>
                   <div>
-                  <p className="text-xl font-bold text-dark">
-                    Orden #{order.id}
-                  </p>
-                    <p className="text-muted">{order.date}</p>
+                  <p className="text-lg sm:text-xl font-bold text-dark">
+  Orden #{order.id}
+</p>
+                    <p className="text-muted text-sm sm:text-base">{order.date}</p>
                   </div>
                   </div>
 
-<div className="text-right">
-  <p className="text-2xl font-black text-accent">
+<div className="text-left sm:text-right mt-4 sm:mt-0">
+  <p className="text-xl sm:text-2xl font-black text-accent">
     S/. {order.total.toLocaleString('es-PE')}
   </p>
-  <p className="text-sm text-muted mt-2 flex items-center gap-2 justify-end">
+  <p className="text-xs sm:text-sm text-muted mt-2 flex items-center gap-2 justify-center sm:justify-end">
     <Gift size={16} className="text-accent" />
     +{order.pointsEarned} puntos ganados
   </p>
@@ -232,18 +232,18 @@ const downloadOrderPDF = (order: Order) => {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.4, type: "spring" }}
-                      className="border-t border-slate-100 bg-slate-50/50 p-8 space-y-6"
+                      className="border-t border-slate-100 bg-slate-50/50 p-6 sm:p-8 space-y-6"
                     >
                       <h3 className="text-xl font-bold text-dark mb-4">Productos en este pedido</h3>
                       <div className="space-y-4">
                         {order.items.map((item) => (
-                          <div key={item.id} className="flex items-center gap-4 bg-white rounded-2xl p-4 shadow-md border border-slate-100">
+                          <div key={item.id} className="flex flex-col sm:flex-row items-start gap-4 bg-white rounded-2xl p-4 shadow-md border border-slate-100">
                             <img 
-                              src={item.img} 
+                              src={item.img}
                               alt={item.title}
-                              className="w-20 h-20 object-contain rounded-xl"
+                              className="w-20 h-20 object-contain rounded-xl self-center sm:self-start"
                             />
-                            <div className="flex-1">
+                            <div className="flex-1 text-left">
                               <p className="font-bold text-dark">{item.title}</p>
                               <p className="text-muted text-sm">Cantidad: {item.quantity}</p>
                               <p className="text-accent font-bold mt-1">
@@ -254,7 +254,7 @@ const downloadOrderPDF = (order: Order) => {
                             <Button 
                               variant="ghost"
                               onClick={() => handleBuyAgain(item)}
-                              className="px-4 py-2 text-sm"
+                              className="w-full sm:w-auto mt-4 sm:mt-0 px-4 py-2 text-sm"
                             >
                               Comprar de nuevo
                             </Button>
@@ -264,30 +264,31 @@ const downloadOrderPDF = (order: Order) => {
                       </div>
                     {/* BUSCA: <div className="pt-6 border-t ..."> */}
                                       {/* REEMPLAZA EL BLOQUE DEL TOTAL FINAL POR ESTE: */}
-                    <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-                      <div className="flex flex-col items-center sm:items-start">
-                        <span className="text-sm text-muted font-bold uppercase">{order.isExchange ? 'Puntos Canjeados' : 'Inversión Total'}</span>
-                        <span className={`text-2xl font-black ${order.isExchange ? 'text-purple-600' : 'text-accent'}`}>
-                          {order.isExchange 
-                            ? `${order.pointsUsed} pts` 
-                            : `S/. ${order.total.toLocaleString('es-PE')}`
-                          }
-                        </span>
-                      </div>
+                    <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-6">
+  <div className="text-center sm:text-left">
+    <span className="text-sm text-muted font-bold uppercase">
+      {order.isExchange ? 'Puntos Canjeados' : 'Inversión Total'}
+    </span>
+    <span className={`text-xl sm:text-2xl font-black block mt-1 ${order.isExchange ? 'text-purple-600' : 'text-accent'}`}>
+      {order.isExchange 
+        ? `${order.pointsUsed} pts` 
+        : `S/. ${order.total.toLocaleString('es-PE')}`
+      }
+    </span>
+  </div>
 
-                      {/* BOTÓN DE DESCARGA PDF */}
-                      <Button 
-                        variant="ghost" 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadOrderPDF(order);
-                        }}
-                        className="flex items-center gap-2 border-2 border-slate-100 hover:border-accent hover:text-accent rounded-2xl px-6 py-3 transition-all font-bold"
-                      >
-                        <FileDown size={20} />
-                        Descargar Comprobante PDF
-                      </Button>
-                    </div>
+  <Button 
+    variant="ghost" 
+    onClick={(e) => {
+      e.stopPropagation();
+      downloadOrderPDF(order);
+    }}
+    className="w-full sm:w-auto flex items-center justify-center gap-2 border-2 border-slate-300 hover:border-accent hover:text-accent rounded-2xl px-6 py-3 transition-all font-bold text-sm sm:text-base"
+  >
+    <FileDown size={18} />
+    Descargar Comprobante PDF
+  </Button>
+</div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -300,8 +301,10 @@ const downloadOrderPDF = (order: Order) => {
               className="text-center py-20"
             >
               <Package size={80} className="text-muted mx-auto mb-6" />
-              <p className="text-2xl text-muted">No tienes pedidos aún</p>
-              <p className="text-muted mt-4">Explora nuestro catálogo y realiza tu primera compra</p>
+              <p className="text-xl sm:text-2xl text-muted">No tienes pedidos aún</p>
+<p className="text-base sm:text-lg text-muted mt-4 max-w-md mx-auto">
+                Explora nuestro catálogo y realiza tu primera compra
+              </p>
               <Link to="/equipamiento">
                 <Button variant="primary" className="mt-8 px-8 py-4 text-lg">
                   Ir al Catálogo

@@ -45,7 +45,7 @@ const ProductDetail: React.FC = () => {
   // 2. Si no existe → 404
   if (!product) {
     return (
-      <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto text-center min-h-screen">
+      <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen overflow-x-hidden">
         <motion.h2 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -122,7 +122,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   const baseImgName = product.img.split('/').pop()?.replace('.jpg', '') || 'product';
 
   return (
-    <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen">
+    <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen overflow-x-hidden">
       {/* Breadcrumb */}
       <motion.nav 
         initial={{ opacity: 0, y: -20 }}
@@ -140,7 +140,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       </motion.nav>
 
       {/* Sección Principal */}
-      <div className="grid lg:grid-cols-2 gap-12 mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-12 lg:mb-16">
         {/* Imagen Principal */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -177,14 +177,21 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   className="mb-12 flex flex-col gap-6"  // ← Jerarquía vertical, gap para espacio armonioso
 >
   {/* Black Friday – Mantiene impacto principal con animaciones */}
-  <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white px-8 py-8 rounded-3xl shadow-2xl relative overflow-hidden w-full md:w-[485px]">
+  <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-600 text-white px-4 sm:px-6 lg:px-8 py-6 sm:py-8 rounded-3xl shadow-2xl relative overflow-hidden w-full">
     {/* Fuego animado – Dinámico */}
     <motion.div 
-      className="absolute top-1 right-8 "
+      className="absolute top-1 right-4 sm:right-12"  // ← right-4 en móvil
       animate={{ y: [20, 30, 20] }}
       transition={{ duration: 0.6, repeat: Infinity }}
     >
-      <Flame size={48} className="absolute right-4 top-1/2 -translate-y-1 text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)] z-0" />
+      <Flame 
+      size={48} 
+      className="hidden sm:block text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]" 
+    />
+    <Flame 
+      size={24} 
+      className="sm:hidden text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.6)]" 
+    />
     </motion.div>
     {/* Precio tachado */}
     <div className="text-lg opacity-80 line-through mb-2">
@@ -197,7 +204,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       </span>
 
       <motion.span 
-        className="text-3xl font-black"
+        className="text-2xl sm:text-3xl font-black"
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.6 }}
@@ -207,7 +214,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
       </motion.span>
 
       <motion.span 
-        className="absolute right-5 top-1/2 -translate-y-1/2 bg-yellow-400 text-black px-2 py-1 rounded-full text-lg font-black shadow-lg"
+       className="absolute right-1 sm:right-5 top-1/ sm:top-1/2 -translate-y-1/2 bg-yellow-400 text-black px-1 py-1 sm:px-3 sm:py-2 rounded-full font-black shadow-lg text-xs sm:text-lg"
         initial={{ scale: 0 }}
         animate={{ scale: [1, 1.3, 1] }}
         transition={{ duration: 0.6, delay: 0.8, repeat: Infinity, repeatDelay: 3 }}
@@ -228,10 +235,10 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 280, damping: 25, delay: 0.8 }}
-                className="-mt-4 max-w-2xl w-full max-w-lg rounded-3xl shadow-xl border-2 border-accent overflow-hidden relative"
+                className="-mt-4 w-full rounded-3xl shadow-xl border-2 border-accent overflow-hidden relative"
               >
                 {/* Fondo azul fuerte con degradado (similar al botón carrito) */}
-                <div className="bg-gradient-to-br from-accent to-accent-dark p-5 border-b border-accent-dark/50 relative overflow-hidden">
+                <div className="bg-gradient-to-br from-accent to-accent-dark p-3 sm:p-5 border-b border-accent-dark/50 relative overflow-hidden">
                   {/* Brillo animado cada cierto tiempo (cada 5 segundos) */}
                   <motion.div 
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent"
@@ -245,7 +252,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                       transition={{ duration: 3, repeat: Infinity }}
                       className="inline-block"
                     >
-                      <span className="text-lg font-medium text-white/90">
+                      <span className="text-sm sm:text-lg font-medium text-white/90">
                         Precio Exclusivo 
                       {user && (
   <span
@@ -263,7 +270,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
 </p>
 {user && discountPercent > 0 && (
   <motion.p 
-    className="text-2xl font-black text-white"
+    className="text-base sm:text-2xl font-black text-white"
     animate={{ scale: [1, 1.08, 1] }}
     transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 3 }}
   >
@@ -297,7 +304,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
                     transition={{ type: "spring", stiffness: 250, damping: 18, delay: 1.3 }}
                   >
 <motion.p 
-  className="text-4xl md:text-5xl lg:text-6xl font-black text-accent tracking-tight mb-4"
+ className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-accent tracking-tight mb-4"
   animate={{ scale: [1, 1.04, 1] }}
   transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
 >
@@ -402,7 +409,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
     <div className="flex justify-center">
       <Button 
         variant="primary"
-        className="px-10 py-3 text-xl font-black rounded-2xl shadow-2xl shadow-accent/40 hover:shadow-accent/60 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+        className="px-10 py-3 text-base sm:text-xl font-black rounded-2xl shadow-2xl shadow-accent/40 hover:shadow-accent/60 transition-all duration-300 hover:scale-105 hover:-translate-y-1"
       >
         Mejorar mi Plan
         <ChevronRight size={24} className="ml-3 inline-block" />
@@ -456,18 +463,18 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
 {/* Opciones – Botón ligeramente más pequeño, label a la izquierda, botón centrado */}
 <div className="flex flex-col gap-6 mb-12">
   <div className="flex items-center justify-start gap-6">  {/* Label a la izquierda */}
-    <label className="text-lg font-semibold text-dark">Cantidad:</label>
+    <label className="text-base sm:text-lg font-semibold text-dark">Cantidad:</label>
     <input 
       type="number" 
       defaultValue={1} 
       min={1} 
-      className="w-24 px-4 py-3 text-center border-2 border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-lg font-medium"
+      className="w-14 sm:w-24 px-4 py-2 sm:py-3 text-center border-2 border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base sm:text-lg font-medium"
     />
   </div>
   {/* Color – 100% dinámico según los colores del producto */}
 {product.colors && product.colors.length > 0 && (
-  <div className="flex items-center gap-6">
-    <label className="text-lg font-semibold text-dark min-w-32">Color:</label>
+  <div className="flex items-center justify-start gap-6">
+    <label className="text-base sm:text-lg font-semibold text-dark">Color:</label>
     <div className="relative">
       <select
         value={selectedColor}
@@ -517,7 +524,7 @@ const discountedPrice = blackFridayPrice * (1 - discountPercent / 100);
   transition={{ duration: 0.8, delay: 0.6 }}
 >
   <motion.div 
-    className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white px-8 py-4 rounded-full shadow-2xl text-xl font-bold tracking-wider"
+    className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 text-white px-8 py-4 rounded-full shadow-2xl text-sm sm:text-xl font-bold tracking-wider"
     animate={{ 
       scale: [1, 1.05, 1],
       boxShadow: ["0 10px 30px rgba(0,0,0,0.3)", "0 20px 50px rgba(236,72,153,0.6)", "0 10px 30px rgba(0,0,0,0.3)"]
@@ -714,7 +721,7 @@ onClick={(e) => {
     Imágenes del Producto
   </motion.h2>
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
     {[1, 2, 3, 4].map((i) => (
       <motion.div
         key={i}
@@ -753,13 +760,13 @@ onClick={(e) => {
     Comparativa Técnica
   </motion.h2>
 
-  <div className="max-w-5xl mx-auto mt-12">
-    <div className="grid md:grid-cols-3 gap-8">
+  <div className="max-w-5xl mx-auto mt-8">
+    <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-6 lg:gap-8">
       {/* Columna 1: Característica */}
       <div className="space-y-6">
-        <h4 className="font-bold text-dark text-lg">Características</h4>
+        <h4 className="font-bold text-dark text-sm sm:text-lg text-center">Características Xtreme</h4>
         {['Velocidad', 'Precisión', 'Batería', 'Peso', 'Garantía'].map((feat) => (
-          <div key={feat} className="py-4 px-6 bg-white rounded-2xl shadow-md text-center font-medium">
+          <div key={feat} className="py-4 px-2 bg-white rounded-2xl shadow-md text-center font-medium text-xs sm:text-lg">
             {feat}
           </div>
         ))}
@@ -767,7 +774,7 @@ onClick={(e) => {
 
       {/* Columna 2: Tu producto (destacado) */}
       <div className="space-y-6">
-        <h4 className="font-bold text-accent text-lg text-center">Xtreme {product.title.split(' ')[0]}</h4>
+        <h4 className="font-bold text-accent text-sm sm:text-lg text-center">Xtreme {product.title.split(' ')[0]}</h4>
         {[
           { value: '30.000 RPM', color: 'bg-green-500' },
           { value: '±0.02 mm', color: 'bg-green-500' },
@@ -779,7 +786,7 @@ onClick={(e) => {
             key={i}
             initial={{ scale: 0.9 }}
             whileInView={{ scale: 1.05 }}
-            className={`py-4 px-6 rounded-2xl text-white font-black text-center shadow-xl ${item.color}`}
+            className={`py-4 px-2 rounded-2xl text-white font-black text-center shadow-xl text-xs sm:text-lg ${item.color}`}
           >
             {item.value}
           </motion.div>
@@ -788,9 +795,9 @@ onClick={(e) => {
 
       {/* Columna 3: Competencia */}
       <div className="space-y-6">
-        <h4 className="font-bold text-slate-500 text-lg text-center">Competencia Media</h4>
+        <h4 className="font-bold text-slate-500 text-sm sm:text-lg text-center">Competencia Media</h4>
         {['25.000 RPM', '±0.1 mm', '6 horas', '250g', '12 meses'].map((val, i) => (
-          <div key={i} className="py-4 px-6 bg-slate-100 rounded-2xl text-center font-medium text-slate-600">
+          <div key={i} className="py-4 px-2 bg-slate-100 rounded-2xl text-center font-medium text-xs sm:text-lg">
             {val}
           </div>
         ))}
@@ -811,7 +818,7 @@ onClick={(e) => {
     Análisis Técnico Visual
   </motion.h3>
 
-  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-8 lg:gap-8">
 
     {/* 1. Gráfico Circular – Precisión */}
     <motion.div 
@@ -975,7 +982,7 @@ onClick={(e) => {
         >
             Vista Detallada del Producto
         </motion.h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {[1, 2, 3, 4, 5].map((num) => (
             <motion.div
                 key={num}
@@ -1017,7 +1024,7 @@ onClick={(e) => {
         Productos Relacionados
       </motion.h2>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
         {relatedProductsArray
           .filter(p => p.id > product.id && p.id <= product.id + 5)  // ← Los 5 siguientes
           .map((related, i) => (
@@ -1092,7 +1099,7 @@ onClick={(e) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
           onClick={closeLightbox}
-          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-0"  // p-0 para 0 márgenes
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-2 sm:p-4"  // p-0 para 0 márgenes
         >
           <motion.div
             key={lightboxImage}

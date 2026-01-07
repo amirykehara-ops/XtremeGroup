@@ -23,7 +23,7 @@ const About: React.FC = () => {
                 transition={{ delay: 0.5, duration: 0.8 }}
                 className="h-2 bg-accent mb-8"
             />
-            <h1 className="text-5xl md:text-7xl font-bold text-dark mb-8 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-dark mb-8 leading-tight">
               Impulsando la <br/>
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-accent-dark">Odontología del Futuro</span>
             </h1>
@@ -73,10 +73,10 @@ const About: React.FC = () => {
           >
             <div className="absolute inset-0 bg-accent rounded-[3rem] rotate-6 opacity-10 blur-xl scale-105"></div>
             <img 
-              src="images/centro.jpg" 
-              alt="Local" 
-              className="relative rounded-[3rem] shadow-2xl z-10 w-full h-auto object-cover border-4 border-white" 
-            />
+  src="images/centro.jpg" 
+  alt="Local Xtreme Group" 
+  className="relative rounded-3xl sm:rounded-[3rem] shadow-2xl z-10 w-full h-auto object-cover border-4 border-white"
+/>
             
             {/* Floating Stats Cards */}
             <motion.div 
@@ -132,7 +132,7 @@ const About: React.FC = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-4xl md:text-6xl font-bold text-dark mb-4"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-dark mb-4"
             >
                 El Viaje de Xtreme Group
             </motion.h2>
@@ -155,7 +155,7 @@ const About: React.FC = () => {
               >
                 <div className="h-56 overflow-hidden relative">
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-60 group-hover:opacity-40 transition-opacity"></div>
-                  <img src={item.img} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out" />
+                  <img src={item.img} alt={item.title} className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-in-out" />
                   <div className="absolute bottom-4 left-4 z-20">
                      <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent text-white text-sm font-bold rounded-full shadow-lg">
                         {item.year}
@@ -192,7 +192,7 @@ const About: React.FC = () => {
              viewport={{ once: true }}
              transition={{ duration: 0.6 }}
              whileHover={{ scale: 1.02 }}
-             className="bg-white p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-slate-100"
+             className="bg-white p-8 sm:p-10 rounded-[2.5rem] shadow-[0_10px_40px_rgba(0,0,0,0.06)] border border-slate-100"
            >
              <div className="flex items-center gap-4 mb-8">
                 <div className="p-4 bg-blue-50 text-accent rounded-2xl">

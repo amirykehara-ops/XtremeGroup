@@ -81,7 +81,7 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
           initial={{ opacity: 0, y: -40, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="text-4xl md:text-6xl font-bold text-dark mb-6"
+          className="text-4xl sm:text-5xl md:text-6xl font-bold text-dark mb-6"
         >
           Equipamiento Profesional
         </motion.h1>
@@ -119,14 +119,14 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-10 text-dark">
           Explora por Categoría
         </h2>
-        <div className="flex flex-wrap justify-center gap-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 max-w-5xl mx-auto">
           {['Todos', 'Motores Eléctricos', 'Lámparas', 'Implantes', 'Endo Motor', 'Fotocurado', 'Ultrasonidos', 'Mobiliario', 'Localizadores', 'Mantenimiento'].map((cat) => (
             <motion.button
               key={cat}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-6 py-3 rounded-full font-medium transition-all duration-300 shadow-md ${
+              className={`px-4 py-3 sm:px-6 sm:py-3 rounded-full font-medium text-sm sm:text-basetransition-all duration-300 shadow-md ${
                 selectedCategory === cat
                   ? 'bg-accent text-white shadow-accent/40'
                   : 'bg-white text-dark border border-slate-200 hover:bg-accent hover:text-white hover:border-accent'
@@ -145,7 +145,7 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
         transition={{ delay: 0.4 }}
         className="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 mb-12"
       >
-        <div className="flex flex-col lg:flex-row gap-6 lg:items-center justify-between">
+        <div className="flex flex-col md:flex-row gap-6 md:items-center justify-between">
           <div className="flex flex-col md:flex-row gap-4 items-center flex-1 w-full">
             <div className="relative w-full md:w-64">
               <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -182,7 +182,7 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
                  <option value="preorder">Pre-orden</option>
                </select>
             </div>
-            <div className="w-full md:w-48 flex flex-col justify-center">
+            <div className="w-full md:w-64 flex flex-col justify-center">
               <div className="flex justify-between text-xs text-muted mb-1">
                 <span>Precio</span>
                 <span>{priceRange === 100 ? 'Todos' : `< S/ ${(10000 * priceRange/100).toLocaleString()}`}</span>
@@ -230,7 +230,7 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
                   <img 
                     src={product.img} 
                     alt={product.title} 
-                    className="max-w-[85%] max-h-[85%] object-contain group-hover:scale-110 transition-transform duration-500 ease-in-out" 
+                   className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-in-out" 
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
                   <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
@@ -322,7 +322,7 @@ const [visibleProducts, setVisibleProducts] = useState<Product[]>(allProducts);
 
       {/* NUEVA PAGINACIÓN */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 mt-16 mb-8">
+        <div className="flex flex-wrap justify-center items-center gap-3 mt-16 mb-8">
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}

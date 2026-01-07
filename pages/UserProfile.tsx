@@ -78,7 +78,7 @@ const UserProfile: React.FC = () => {
 
   if (!user) {
   return (
-    <div className="pt-28 pb-20 px-6 max-w-4xl mx-auto text-center min-h-screen flex flex-col items-center justify-center">
+    <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen relative overflow-x-hidden flex items-center justify-center">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -115,20 +115,20 @@ const UserProfile: React.FC = () => {
 } 
 
   return (
-    <div className="pt-28 pb-20 px-6 max-w-7xl mx-auto min-h-screen">
+    <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen overflow-x-hidden">
       {/* Hero Perfil */}
       <motion.div 
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <h1 className="text-5xl md:text-6xl font-black text-dark mb-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-dark mb-4 text-center">
           Bienvenido, <span className="text-accent">{user.name || user.email}</span>
         </h1>
         <p className="text-xl text-muted">Tu centro de fidelidad y beneficios exclusivos</p>
       </motion.div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
 {/* Nivel y Progreso – Tarjeta ULTRA PREMIUM Corregida */}
 <motion.div 
   initial={{ opacity: 0, scale: 0.9 }}
@@ -170,23 +170,28 @@ const UserProfile: React.FC = () => {
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           className="text-7xl filter drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]"
         >
-          {user?.subscription === 'prime_pro' ? <Crown className="text-amber-400" size={72} /> : 
-          user?.subscription === 'prime_basic' ? <Trophy className="text-accent" size={72} /> : 
-          <Trophy className="text-slate-300" size={72} />}
+          {user?.subscription === 'prime_pro' ? <Crown className="hidden sm:block text-amber-400" size={72} /> : 
+          user?.subscription === 'prime_basic' ? <Trophy className="hidden sm:block text-accent" size={72} /> : 
+          <Trophy className="hidden sm:block text-slate-300" size={72} />}
+
+                    {user?.subscription === 'prime_pro' ? <Crown className="sm:hidden text-amber-400" size={30} /> : 
+          user?.subscription === 'prime_basic' ? <Trophy className="sm:hidden text-accent" size={30} /> : 
+          <Trophy className="sm:hidden text-slate-300" size={30} />}
+
         </motion.div>
 
         <div className="flex flex-col">
-          <p className={`text-6xl font-black bg-gradient-to-r ${getSubscriptionColor(user?.subscription)} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
+          <p className={`text-2xl sm:text-6xl font-black bg-gradient-to-r ${getSubscriptionColor(user?.subscription)} bg-clip-text text-transparent filter drop-shadow-sm leading-none`}>
             {benefits.name}
           </p>
-<p className="text-lg text-white font-bold flex items-center gap-2 mt-2">
+<p className="text-xs sm:text-lg text-white font-bold flex items-center gap-2 mt-2">
   <span className="h-2 w-2 bg-white rounded-full animate-pulse shadow-[0_0_10px_white]" />
   
   {user?.subscription === 'regular' ? (
     'Sin fecha de expiración'
   ) : (
     <>
-      Prime hasta: <strong>{formattedEndDate}</strong>
+      Prime hasta: <span>{formattedEndDate}</span>
     </>
   )}
 </p>
@@ -196,10 +201,10 @@ const UserProfile: React.FC = () => {
       </div>
       </div>
 
-      <div className="text-accent bg-white px-6 py-4 rounded-2xl shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-        <p className="text-lg text-accent font-black mb-1 text-center">Puntos Totales</p>
+      <div className="text-accent bg-white px-auto sm:px-6 py-auto sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+        <p className="text-xs sm:text-lg text-accent font-black mb-auto text-center">Puntos Totales</p>
         <motion.p 
-          className="text-6xl font-black text-accent text-center drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+          className="text-xl sm:text-6xl font-black text-accent text-center drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           animate={{ scale: [1, 1.05, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
         >
@@ -212,11 +217,11 @@ const UserProfile: React.FC = () => {
 
 {/* Barra de Progreso a Máximo Ahorro – Nueva versión PODEROSA */}
 <div className="mb-8">
-  <div className="flex justify-between text-sm text-white font-medium mb-3">
+  <div className="flex justify-between text-xs sm:text-sm text-white font-medium mb-1">
     <span>Tu Progreso XTREME</span>
     <span>{progress}% hacia Prime Pro</span>
   </div>
-  <div className="relative h-10 bg-slate-200 rounded-full overflow-hidden shadow-inner mt-4">
+  <div className="relative h-8 sm:h-10 bg-slate-200 rounded-full overflow-hidden shadow-inner mt-4">
     <motion.div 
       className="h-full bg-gradient-to-r from-accent to-accent-dark relative overflow-hidden"
       initial={{ width: 0 }}
@@ -227,7 +232,7 @@ const UserProfile: React.FC = () => {
       {/* Badges en el progreso */}
             {progress == 30 && (
         <motion.span 
-          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          className="absolute right-1 top-1 sm:top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-1 sm:px-2 py-1 rounded-full shadow-md"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
         >
@@ -236,7 +241,7 @@ const UserProfile: React.FC = () => {
       )}
       {progress ==70 && (
         <motion.span 
-          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+          className="absolute right-1 top-1 sm:top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-1 sm:px-2 py-1 rounded-full shadow-md"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
         >
@@ -245,7 +250,7 @@ const UserProfile: React.FC = () => {
       )}
       {progress == 100 && (
         <motion.span 
-          className="absolute right-4 top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-2 py-1 rounded-full shadow-md"
+           className="absolute right-1 top-1 sm:top-2 -translate-y-1/2 bg-white/80 text-accent text-xs font-bold px-1 sm:px-2 py-1 rounded-full shadow-md"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
         >
@@ -254,20 +259,20 @@ const UserProfile: React.FC = () => {
       )}
     </motion.div>
   </div>
-<p className="text-center mt-8 text-white font-medium mb-8">
+<p className="text-center mt-12 sm:mt-8 text-white font-medium mb-8">
   {user?.subscription === 'prime_pro' ? (
-    <span className="text-ghost font-bold text-2xl">¡Máximo nivel alcanzado! 🏆</span>
+    <span className="text-ghost font-bold text-base sm:text-2xl">¡Máximo nivel alcanzado! 🏆</span>
   ) : user?.subscription === 'prime_basic' ? (
-    <span className="text-lg mt-4">
+    <span className="text-sm sm:text-lg mt-4">
       Mejora a <strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> Prime Pro</strong> 
-      <span className="mx-1">para desbloquear</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 20% descuento</strong> 
-      <span className="mx-1">y</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 3x puntos</strong>
+      <span className="mx-2 sm:mx-1">para desbloquear</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 20% descuento</strong> 
+      <span className="mx-2 sm:mx-1">y</span><strong className="bg-white text-amber-600 px-2 py-auto rounded-full font-black"> 3x puntos</strong>
     </span>
   ) : (
-    <span className="text-lg">
+    <span className="text-sm sm:text-lg">
       Mejora a <strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> Prime Básico</strong> 
-      <span className="mx-1">para desbloquear</span> <strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 10% descuento</strong> 
-     <span className="mx-1">y</span><strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 2x puntos</strong>
+      <span className="mx-2 sm:mx-1">para desbloquear</span> <strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 10% descuento</strong> 
+     <span className="mx-2 sm:mx-1">y</span><strong className="bg-white text-accent px-2 py-auto rounded-full font-black"> 2x puntos</strong>
     </span>
   )}
 </p>
@@ -277,7 +282,7 @@ const UserProfile: React.FC = () => {
     <Link to="/suscripciones">
       <Button
         variant="primary"
-        className="px-10 py-5 text-lg font-black bg-blue text-accent hover:bg-accent hover:text-white flex items-center gap-2 shadow-xl rounded-3xl"
+        className="px-4 sm:px-10 py-3 sm:py-5 text-base sm:text-lg font-black bg-blue text-accent hover:bg-accent hover:text-white flex items-center gap-2 shadow-xl rounded-3xl"
       >
         {user?.subscription === 'regular'
           ? 'Mejorar a Prime'
@@ -316,13 +321,14 @@ const UserProfile: React.FC = () => {
       initial={{ opacity: 0, x: -30 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.3 + i * 0.1 }}
-      className="flex items-center gap-4 bg-white/70 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-accent/10"
+      className="flex items-center gap-2 sm:gap-4 bg-white/70 backdrop-blur-sm rounded-2xl p-3 sm:p-5 shadow-lg border border-accent/10"
       whileHover={{ scale: 1.03, borderColor: 'rgb(59 130 246)' }}
     >
-      <div className="h-12 w-12 bg-accent/20 rounded-2xl flex items-center justify-center">
-        <Star size={24} className="text-accent" />
+      <div className="h-8 sm:h-12 w-8 sm:w-12 bg-accent/20 rounded-2xl flex items-center justify-center">
+        <Star size={24} className="hidden sm:block text-accent" />
+        <Star size={16} className="sm:hidden text-accent" />
       </div>
-      <p className="font-medium text-dark">{benefit}</p>
+      <p className="font-medium text-dark text-sm sm:text-base">{benefit}</p>
     </motion.div>
   ))}
 
@@ -332,14 +338,23 @@ const UserProfile: React.FC = () => {
   <Link to="/order-history" className="block">
     <Button
       variant="primary"
-      className="w-full py-5 text-lg font-black bg-gradient-to-r from-accent to-accent-dark hover:from-accent-dark hover:to-accent text-white rounded-3xl shadow-2xl shadow-accent/30 transition-all active:scale-95 flex items-center justify-center group"
+      className="w-full py-2 sm:py-5 text-base sm:text-lg font-black bg-gradient-to-r from-accent to-accent-dark hover:from-accent-dark hover:to-accent text-white rounded-3xl shadow-2xl shadow-accent/30 transition-all active:scale-95 flex items-center justify-center group"
     >
       <motion.div
         whileHover={{ y: -6, rotate: 5 }}
         transition={{ type: "spring", stiffness: 300 }}
-        className="mr-4"
+        className="mr-4 hidden sm:block"
       >
         <Package size={32} strokeWidth={3} />
+        
+      </motion.div>
+            <motion.div
+        whileHover={{ y: -6, rotate: 5 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="mr-4 sm:hidden"
+      >
+        <Package size={24} strokeWidth={3} />
+        
       </motion.div>
       <span>Historial de Pedidos</span>
     </Button>
@@ -350,14 +365,21 @@ const UserProfile: React.FC = () => {
   <Link to="/points-history" className="block">
     <Button
       variant="primary"
-      className="w-full py-5 text-lg font-black bg-gradient-to-r from-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-3xl shadow-2xl shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center group"
+      className="w-full py-2 sm:py-5 text-base sm:text-lg font-black bg-gradient-to-r from-orange-500 to-amber-600 hover:from-amber-600 hover:to-orange-600 text-white rounded-3xl shadow-2xl shadow-amber-500/30 transition-all active:scale-95 flex items-center justify-center group"
     >
       <motion.div
         whileHover={{ y: -6, rotate: 5 }}
         transition={{ type: "spring", stiffness: 300 }}
-        className="mr-4"
+        className="mr-4 hidden sm:block"
       >
         <Star size={32} strokeWidth={3} />
+      </motion.div>
+            <motion.div
+        whileHover={{ y: -6, rotate: 5 }}
+        transition={{ type: "spring", stiffness: 300 }}
+        className="mr-4 sm:hidden"
+      >
+        <Star size={24} strokeWidth={3} />
       </motion.div>
       <span>Historial de Puntos</span>
     </Button>
@@ -383,8 +405,8 @@ const UserProfile: React.FC = () => {
     />
 
     <div className="relative z-10">
-      <h3 className="text-2xl font-bold mb-6">Invita y Gana</h3>
-      <p className="text-white/90 mb-6 text-lg">
+      <h3 className="text-xl sm:text-2xl font-bold mb-6">Invita y Gana</h3>
+      <p className="text-white/90 mb-6 text-base sm:text-lg">
         Comparte tu código y gana <strong>100 puntos</strong> por cada amigo que compre.
       </p>
 
@@ -394,7 +416,7 @@ const UserProfile: React.FC = () => {
           type="text"
           value={referralCode}
           readOnly
-          className="min-w-0 flex-1 px-4 py-4 rounded-2xl bg-white/20 border border-white/30 text-white placeholder-white/50 text-lg font-bold text-center"
+          className="min-w-0 flex-1 px-4 py-4 rounded-2xl bg-white/20 border border-white/30 text-white placeholder-white/50 font-bold text-center"
         />
 <Button 
   variant="ghost" 
@@ -451,7 +473,7 @@ const UserProfile: React.FC = () => {
 
   <div className="flex items-center justify-between mb-6">
     <div>
-      <h3 className="text-2xl font-bold text-dark">Mis Datos</h3>
+      <h3 className="text-xl sm:text-2xl font-bold text-dark">Mis Datos</h3>
       <p className="text-xs text-slate-400 font-medium">Actualiza tu información</p>
     </div>
     <User className="text-dark" size={40}/>
@@ -462,28 +484,28 @@ const UserProfile: React.FC = () => {
       
       {/* Campo: Nombre - Título AZUL y Compacto */}
       <div className="flex flex-col gap-1.5 text-left">
-        <label className="text-lg font-bold text-accent ml-1">
+        <label className="text-base sm:text-lg font-bold text-accent ml-1">
           Nombre completo
         </label>
         <input 
           {...register('name', { required: true })}
           defaultValue={ user.name} // Autollenado
           placeholder={user.name}
-          className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
+          className="w-full px-4 py-2 sm:py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
         />
         {errors.name && <p className="text-red-500 text-xs mt-0.5 ml-2 font-bold uppercase">Requerido</p>}
       </div>
 
       {/* Campo: Email - Título AZUL y Compacto */}
       <div className="flex flex-col gap-1.5 text-left">
-        <label className="text-lg font-bold text-accent ml-1">
+        <label className="text-base sm:text-lg font-bold text-accent ml-1">
           Email
         </label>
         <input 
           {...register('email', { required: true, pattern: /^\S+@\S+$/i })}
           defaultValue={user.email} // Autollenado
           placeholder={user.email}
-          className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
+          className="w-full px-4 py-2 sm:py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
         />
         {errors.email && <p className="text-red-500 text-xs mt-0.5 ml-2 font-bold uppercase">Email inválido</p>}
       </div>
@@ -491,27 +513,27 @@ const UserProfile: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Campo: Teléfono */}
         <div className="flex flex-col gap-1.5 text-left">
-          <label className="text-lg font-bold text-accent ml-1">
+          <label className="text-base sm:text-lg font-bold text-accent ml-1">
             Teléfono
           </label>
           <input 
             {...register('phone')}
             defaultValue={user?.phone || ""}
             placeholder="Teléfono"
-            className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
+            className="w-full px-4 py-2 sm:py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
           />
         </div>
 
         {/* Campo: Dirección */}
         <div className="flex flex-col gap-1.5 text-left">
-          <label className="text-lg font-bold text-accent ml-1">
+          <label className="text-base sm:text-lg font-bold text-accent ml-1">
             Dirección
           </label>
           <input 
             {...register('address')}
             defaultValue={user?.address || ""}
             placeholder="Tu dirección"
-            className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
+            className="w-full px-4 py-2 sm:py-3.5 rounded-xl border-2 border-slate-100 focus:border-accent focus:ring-4 focus:ring-accent/5 transition-all text-dark outline-none font-medium"
           />
         </div>
       </div>
@@ -520,7 +542,7 @@ const UserProfile: React.FC = () => {
     <Button 
       type="submit" 
       variant="primary" 
-      className="w-full py-4 text-lg font-bold bg-accent hover:bg-accent-dark text-white rounded-xl shadow-lg shadow-accent/20 transition-all active:scale-95 mt-2"
+      className="w-full py-4 text-lg font-bold bg-accent hover:bg-accent-dark text-white rounded-xl shadow-lg shadow-accent/20 transition-all active:scale-95 mt-10"
     >
       Guardar Cambios
     </Button>

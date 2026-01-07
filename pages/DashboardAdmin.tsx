@@ -182,7 +182,7 @@ const expiry = new Date(dateStr);
   setUsers(updatedUsers);
       
       // Solo si el Admin se está editando a sí mismo, actualizamos su sesión
-      if (user && (userId === user.email)) {
+      if (user && (userId === user.email || userId === user.id)) {
     updateUser({ points: newPoints });
   } 
 
@@ -722,10 +722,12 @@ onClick={() => {
   ));
 
   // Actualizamos el contexto del usuario (para sincronización y tiempo real)
+  if (user && u.email === user.email) {
   updateUser({
     points: newPoints,
     pointsHistory: [...(u.pointsHistory || []), newHistory]
   });
+}
 
   // Limpiar inputs
   const pointsInput = document.getElementById(`points-adjust-${u.email}`) as HTMLInputElement;

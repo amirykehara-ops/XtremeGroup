@@ -206,7 +206,7 @@ const handleCanje = (product: Product) => {
         animate={{ opacity: 1 }}
         className="relative z-10"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {CATALOG_PRODUCTS.map((product, i) => (
             <motion.div
               key={product.id}
@@ -287,7 +287,7 @@ const handleCanje = (product: Product) => {
         className="mt-20 text-center relative z-10"
       >
         <motion.h2 
-          className="text-3xl font-bold text-dark mb-6"
+          className="text-2xl sm:text-3xl md:text-4xl font-bold text-dark mb-6"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -445,7 +445,7 @@ const handleCanje = (product: Product) => {
       >
         {/* Imagen + Título */}
         <div className="relative">
-          <div className="h-64 bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-3xl overflow-hidden">
+          <div className="h-56 sm:h-64 bg-gradient-to-br from-slate-50 to-slate-100 rounded-t-3xl overflow-hidden">
             <img 
               src={selectedCanje.img} 
               alt={selectedCanje.title}
@@ -542,14 +542,14 @@ const handleCanje = (product: Product) => {
           <div className="flex gap-4">
             <Button
               variant="ghost"
-              className="flex-1 py-2 text-lg font-bold border-2 border-slate-300 hover:border-slate-400"
+              className="flex-1 py-4 sm:py-5 text-base sm:text-lg font-bold border-2 border-slate-300 hover:border-slate-400 transition-all duration-200"
               onClick={() => setShowCanjeModal(false)}
             >
               Regresar
             </Button>
             <Button
               variant="primary"
-              className="flex-1 py-4 text-lg font-bold shadow-2xl shadow-accent/30"
+              className="flex-1 py-4 sm:py-5 text-base sm:text-lg font-bold shadow-2xl shadow-accent/40 hover:shadow-accent/60 transition-all duration-300"
               onClick={() => {
                 if (!selectedCanje || !user) return;
 

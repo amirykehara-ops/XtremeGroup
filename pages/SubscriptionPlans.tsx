@@ -200,7 +200,7 @@ if (showLoginRequired) {
   );
 }
   return (
-    <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen relative overflow-hidden">
+    <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen relative overflow-hidden">
       {/* Partículas */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         {Array.from({ length: 15 }).map((_, i) => (
@@ -214,16 +214,16 @@ if (showLoginRequired) {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-20 relative z-10"
       >
-        <h1 className="text-5xl md:text-6xl font-black text-dark mb-6">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-dark mb-6">
           Membresías <span className="text-accent">XTREME</span>
         </h1>
-        <p className="text-xl text-muted max-w-3xl mx-auto mb-12">
+        <p className="text-lg sm:text-xl text-muted max-w-3xl mx-auto mb-12">
           Diseñadas para quienes no esperan. Únete a miles de profesionales que ya han transformado su forma de comprar en nuestro marketplace.
         </p>
       </motion.section>
 
       {/* Planes */}
-      <div className="grid md:grid-cols-3 gap-8 mb-20 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-16 lg:mb-20 relative z-10">
         {plans.map((plan) => (
           <motion.div
             key={plan.id}
@@ -287,37 +287,53 @@ if (showLoginRequired) {
       </div>
 
       {/* Tabla Comparativa */}
-      <section className="mb-20 max-w-6xl mx-auto">
-        <h2 className="text-4xl font-black text-dark text-center mb-12">
-          Compara los beneficios
-        </h2>
-        <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-slate-50">
-              <tr>
-                <th className="p-6 text-left text-sm font-black text-muted uppercase">Beneficio</th>
-                <th className="p-6 text-center text-sm font-black text-muted uppercase">Regular</th>
-                <th className="p-6 text-center text-sm font-black text-accent uppercase">Prime Básico</th>
-                <th className="p-6 text-center text-sm font-black text-amber-600 uppercase">Prime Pro</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {comparisonData.map((row, i) => (
-                <tr key={i} className="hover:bg-slate-50 transition-colors">
-                  <td className="p-6 font-bold text-dark">{row.feature}</td>
-                  <td className="p-6 text-center text-muted">{row.regular}</td>
-                  <td className="p-6 text-center text-dark font-bold">
-                    {typeof row.basic === 'object' ? <InfoTooltip title={row.basic.title} desc={row.basic.desc} /> : row.basic}
-                  </td>
-                  <td className="p-6 text-center text-dark font-bold">
-                    {typeof row.pro === 'object' ? <InfoTooltip title={row.pro.title} desc={row.pro.desc} /> : row.pro}
-                  </td>
+      <section className="mb-20">
+  {/* Título centrado en todas las pantallas */}
+  <h2 className="text-3xl sm:text-4xl font-black text-dark text-center mb-12 px-4">
+    Compara los Beneficios
+  </h2>
+
+  {/* Contenedor que centra la tabla SOLO en desktop */}
+  <div className="flex justify-center">
+    <div className="w-full max-w-6xl">
+      {/* Scroll horizontal controlado (solo se activa en móvil si es necesario) */}
+      <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="inline-block min-w-full md:min-w-0">
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+            <table className="w-full table-auto">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="p-4 sm:p-6 text-left sm:text-center text-xs sm:text-sm font-black text-muted uppercase">Beneficio</th>
+                  <th className="p-4 sm:p-6 text-center text-xs sm:text-sm font-black text-muted uppercase">Regular</th>
+                  <th className="p-4 sm:p-6 text-center text-xs sm:text-sm font-black text-accent uppercase">Prime Básico</th>
+                  <th className="p-4 sm:p-6 text-center text-xs sm:text-sm font-black text-amber-600 uppercase">Prime Pro</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {comparisonData.map((row, i) => (
+                  <tr key={i} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4 sm:p-6 text-sm sm:text-base font-bold text-dark text-left sm:text-center">
+                      {row.feature}
+                    </td>
+                    <td className="p-4 sm:p-6 text-center text-muted text-sm sm:text-base">
+                      {row.regular}
+                    </td>
+                    <td className="p-4 sm:p-6 text-center text-dark font-bold text-sm sm:text-base">
+                      {typeof row.basic === 'object' ? <InfoTooltip title={row.basic.title} desc={row.basic.desc} /> : row.basic}
+                    </td>
+                    <td className="p-4 sm:p-6 text-center text-dark font-bold text-sm sm:text-base">
+                      {typeof row.pro === 'object' ? <InfoTooltip title={row.pro.title} desc={row.pro.desc} /> : row.pro}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </section>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* Por qué Prime - Versión Profesional Actualizada */}
 <section className="mb-20">
@@ -325,12 +341,12 @@ if (showLoginRequired) {
     {/* Decoración sutil de fondo */}
     <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 blur-[100px] rounded-full" />
     
-    <div className="grid md:grid-cols-2 gap-16 items-center relative z-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16 items-start relative z-10">
       <div>
-        <h2 className="text-5xl font-black mb-12 tracking-tighter">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 lg:mb-12 tracking-tighter">
           Tu clínica con el respaldo de <span className="text-accent italic">Prime Pro.</span>
         </h2>
-        <div className="space-y-10">
+        <div className="space-y-8 lg:space-y-10">
         {[
           { 
             icon: <Zap size={28} />, // Definimos el tamaño aquí directamente
@@ -368,18 +384,18 @@ if (showLoginRequired) {
         <h3 className="text-3xl font-black mb-8 italic tracking-tighter">Impacto Financiero</h3>
         <p className="text-xl mb-10 leading-relaxed">
           Un miembro <strong className="text-amber-400 underline decoration-2 underline-offset-4">Prime Pro</strong> optimiza su flujo de caja en promedio 
-          <strong className="text-5xl block mt-6 font-black tracking-tighter text-white uppercase">S/ 4,200</strong> 
+          <strong className="text-3xl sm:text-5xl block mt-6 font-black tracking-tighter text-white uppercase">S/ 4,200</strong> 
           <span className="text-sm font-bold opacity-80 uppercase tracking-widest mt-2 block">Ahorro anual proyectado</span>
         </p>
         
         <div className="bg-slate-900/40 backdrop-blur-md p-8 rounded-3xl border border-white/10">
           <div className="flex items-center gap-2 text-amber-400 mb-3">
             <Sparkles size={18} />
-            <p className="text-xs font-black uppercase tracking-[0.2em]">Próximo Stock VIP:</p>
+            <p className="text-xs sm:text-sm font-black uppercase tracking-[0.2em]">Próximo Stock VIP:</p>
           </div>
-          <p className="text-2xl font-black text-white">
+          <p className="text-sm sm:text-2xl font-black text-white">
             Escáner Intraoral iTero Element 5D <br/>
-            <span className="text-amber-300 text-lg">— Reserva prioritaria 72h</span>
+            <span className="text-amber-300 text-sm sm:text-lg">— Reserva prioritaria 72h</span>
           </p>
         </div>
       </div>
@@ -387,12 +403,12 @@ if (showLoginRequired) {
   </div>
 </section>
       {/* CTA Final */}
-      <section className="text-center py-16 bg-slate-50 rounded-3xl shadow-lg">
-        <h2 className="text-4xl font-black text-accent mb-6">ÚNETE A LA ÉLITE</h2>
-        <p className="text-xl text-muted mb-8 max-w-2xl mx-auto">
-          La inversión que se paga sola desde tu primera compra.
-        </p>
-        <div className="flex flex-col md:flex-row justify-center gap-6">
+<section className="text-center py-12 lg:py-16 bg-slate-50 rounded-3xl shadow-lg">
+  <h2 className="text-3xl sm:text-4xl font-black text-accent mb-6">ÚNETE A LA ÉLITE</h2>
+  <p className="text-lg sm:text-xl text-muted mb-8 max-w-2xl mx-auto">
+    La inversión que se paga sola desde tu primera compra.
+  </p>
+  <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
           <Button variant="primary" className="px-12 py-5 text-xl font-black">
             Hacerme Prime Ahora
           </Button>

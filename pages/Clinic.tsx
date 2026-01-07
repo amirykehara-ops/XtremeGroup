@@ -117,7 +117,7 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
               Catálogo Clínico
             </motion.span>
             <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-              className="text-4xl md:text-6xl font-extrabold text-dark mb-6 leading-tight">
+              className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-dark mb-6 leading-tight">
               Insumos y Tecnología <br/><span className="text-accent">para tu Práctica</span>
             </motion.h1>
             <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
@@ -133,7 +133,7 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
           </div>
 
           <motion.div initial={{ opacity: 0, scale: 0.8, rotate: 10 }} animate={{ opacity: 1, scale: 1, rotate: 3 }} transition={{ delay: 0.5, type: "spring" }} whileHover={{ scale: 1.02 }}
-            className="w-full md:w-[400px] bg-white p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 relative z-20">
+            className="w-full md:w-[400px] bg-white p-6 sm:p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 relative z-20">
             <div className="space-y-6">
               {/* Tus 3 tarjetas de beneficios - sin cambios */}
               <div className="flex items-start gap-4">
@@ -296,7 +296,7 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
           <img 
             src={product.img} 
             alt={product.title} 
-            className="max-h-full object-contain group-hover:scale-110 transition-transform duration-500" 
+            className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500"
           />
           <div className="absolute top-4 right-4 bg-white p-2 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity">
             <Search size={16} className="text-accent" />
@@ -377,7 +377,7 @@ const badgeColor = getSubscriptionColor(user?.subscription || 'regular');
 
             {/* PAGINACIÓN */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-3 mt-16">
+              <div className="flex flex-wrap justify-center items-center gap-3 mt-16">
                 <button
                   onClick={() => goToPage(currentPage - 1)}
                   disabled={currentPage === 1}

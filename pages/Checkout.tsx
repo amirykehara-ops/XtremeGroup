@@ -256,7 +256,7 @@ try {
 
       return (
         
-        <div className="pt-28 pb-20 px-6 max-w-[1400px] mx-auto min-h-screen relative">
+        <div className="pt-28 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-screen relative overflow-x-hidden">
           
           <Link to="/" className="flex items-center gap-2 text-accent mb-8 hover:text-dark transition-colors">
             <ChevronLeft size={20} />
@@ -264,7 +264,7 @@ try {
           </Link>
 
           <motion.h1 
-            className="text-4xl font-bold text-dark mb-12 text-center"
+            className="text-3xl sm:text-4xl font-bold text-dark mb-12 text-center"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -272,7 +272,7 @@ try {
             Checkout
           </motion.h1>
 
-          <div className="grid lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
             {/* Formulario */}
             <motion.div 
               initial={{ opacity: 0, x: -50 }}
@@ -288,7 +288,7 @@ try {
                   placeholder="Nombre Completo"
                   value={formData.name}
                   onChange={handleChange}
-                  className="w-full p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors"
+                  className="w-full p-3 sm:p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base"
                 />
                 <input
                   type="email"
@@ -296,7 +296,7 @@ try {
                   placeholder="Email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors"
+                  className="w-full p-3 sm:p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base"
                 />
                 <input
                   type="text"
@@ -304,13 +304,13 @@ try {
                   placeholder="Dirección Completa"
                   value={formData.address}
                   onChange={handleChange}
-                  className="w-full p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors"
+                  className="w-full p-3 sm:p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base"
                 />
                 <select
                   name="district"
                   value={formData.district}
                   onChange={handleChange}
-                  className="w-full p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors"
+                  className="w-full p-3 sm:p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base"
                 >
                   <option value="">Selecciona Distrito (Lima Metropolitana)</option>
                   {districts.map(district => (
@@ -323,7 +323,7 @@ try {
                   placeholder="Teléfono"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors"
+                 className="w-full p-3 sm:p-4 border border-slate-200 rounded-2xl focus:border-accent focus:outline-none transition-colors text-base"
                 />
               </form>
             </motion.div>
@@ -377,7 +377,7 @@ try {
 
 {/* Mensaje motivador para Prime Basic */}
 {user?.subscription === 'prime_basic' && subtotal < 3000 && subtotal > 0 && (
-  <p className="text-lg font-black text-blue-600 mt-1">
+  <p className="text-base sm:text-lg font-black text-blue-600 mt-1">
     ¡Pide S/ {(3000 - subtotal).toFixed(2)} más para envío GRATIS!
   </p>
 )}
@@ -393,12 +393,14 @@ try {
 
       {/* Carrusel Compacto */}
       <div className="relative group">
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x">
+        <div className="flex gap-2 sm:gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
+
           {recommendedCanjes.map((product) => (
             <div key={product.id} className="min-w-[140px] bg-white rounded-2xl p-3 shadow-sm border border-slate-100 snap-start">
-              <img src={product.img} alt={product.title} className="w-full h-20 object-contain mb-2" />
-              <h4 className="text-[11px] font-bold line-clamp-1 mb-1">{product.title}</h4>
-              <p className="text-accent font-black text-xs mb-2">{product.points} pts</p>
+            {/*<div className="min-w-[120px] sm:min-w-[140px] flex-shrink-0 bg-white rounded-2xl p-2 sm:p-3 shadow-sm border border-slate-100 snap-start">*/}
+<img src={product.img} alt={product.title} className="w-full h-16 sm:h-20 object-contain mb-1 sm:mb-2" />
+  <h4 className="text-[10px] sm:text-[11px] font-bold line-clamp-1 mb-1">{product.title}</h4>
+  <p className="text-accent font-black text-[10px] sm:text-xs mb-1 sm:mb-2">{product.points} pts</p>
               <button 
                 onClick={() => {
                   setSelectedCanje(product);
@@ -406,8 +408,7 @@ try {
                   setSelectedColor(product.colors?.[0] || null);
                   setShowCanjeModal(true);
                 }}
-                className="w-full py-1.5 bg-accent text-white text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-colors"
-              >
+                className="w-full py-1 sm:py-1.5 bg-accent text-white text-[9px] sm:text-[10px] font-bold rounded-lg hover:bg-blue-600 transition-colors">
                 Canjear
               </button>
             </div>
@@ -420,7 +421,7 @@ try {
       </Link>
     </div>
   )}
-                <div className="flex justify-between text-2xl font-bold text-accent">
+                <div className="flex justify-between text-xl sm:text-2xl font-bold text-accent">
                   <span>Total</span>
         
                 <span>S/ {(total || 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -428,7 +429,7 @@ try {
               </div>
               {puntosUsados > 0 && (
   <div className="mt-8 p-4 bg-purple-100 rounded-2xl text-center border border-purple-300">
-    <p className="text-purple-700 font-bold text-lg">
+    <p className="text-purple-700 font-bold text-sm sm:text-lg">
       Usarás {puntosUsados} puntos en canjes
     </p>
   </div>
@@ -449,7 +450,7 @@ try {
 
 {puntosGanados > 0 && (
   <div className="mt-8 p-4 bg-blue-100 rounded-2xl text-center border border-blue-300">
-<p className="text-blue-700 font-bold text-lg">
+<p className="text-blue-700 font-bold text-sm sm:text-lg">
   {user?.subscription === 'prime_pro' ? (
     <>
       ¡Ganarás {puntosGanados} puntos con esta compra!
@@ -471,11 +472,11 @@ try {
 
   </div>
 )}
-              <div className="flex gap-4 mt-8">
-                <Button variant="ghost" className="w-full" onClick={() => navigate(-1)}>
+              <div className="flex gap-4 mt-8 flex-col sm:flex-row">
+                <Button variant="ghost" className="w-full text-base" onClick={() => navigate(-1)}>
                   Regresar
                 </Button>
-          <Button variant="primary" className="w-full" onClick={handleSubmit}>
+          <Button variant="primary" className="w-full text-base" onClick={handleSubmit}>
     Pagar con Mercado Pago
   </Button>
               </div>
@@ -621,14 +622,14 @@ try {
           <div className="flex items-center gap-6 mb-8 bg-slate-50 p-2 rounded-2xl border border-slate-100">
             <button 
               onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}
-              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm hover:bg-slate-100 font-bold text-xl"
+              className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white rounded-xl shadow-sm hover:bg-slate-100 font-bold text-lg sm:text-xl"
             >
               -
             </button>
             <span className="text-2xl font-black w-8 text-center">{selectedQuantity}</span>
             <button 
               onClick={() => setSelectedQuantity(selectedQuantity + 1)}
-              className="w-12 h-12 flex items-center justify-center bg-white rounded-xl shadow-sm hover:bg-slate-100 font-bold text-xl"
+              className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white rounded-xl shadow-sm hover:bg-slate-100 font-bold text-lg sm:text-xl"
             >
               +
             </button>
